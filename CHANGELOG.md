@@ -8,12 +8,15 @@ All notable changes to this project will be documented in this file.
 
 - **Legacy bridge warning**: `status` now injects `version_warning` for legacy bridge plugins (0.5.x) that don't send
   a `hello` message, by falling back to `pluginVersion` from the `get_status` response.
+- Integration tests now pass an explicit `search --include-content <mode>` value and cover all three modes
+  (`markdown`, `structured`, `none`) with response-shape assertions.
 
 ### Added
 
 - **Automatic version compatibility checks**: Daemon receives bridge `hello` message on connect, stores bridge version,
   and logs a warning if minor versions differ (0.x rule). `status` command output now includes `cliVersion` and
   `version_warning` (when bridge/CLI minor versions differ).
+- Integration `Status Check` workflow now fails fast when `status` reports a bridge/CLI `version_warning`.
 
 ### Enhanced
 

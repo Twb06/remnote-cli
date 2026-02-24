@@ -58,5 +58,34 @@ export async function statusWorkflow(
     }
   }
 
+  // Step 3: Fail fast on bridge/CLI version mismatch
+  {
+    const start = Date.now();
+    try {
+      const result = await ctx.cli.runExpectSuccess(['status']);
+      const r = result as Record<string, unknown>;
+      assertHasField(r, 'cliVersion', 'status result cliVersion');
+      assertTruthy(typeof r.cliVersion === 'string', 'cliVersion should be a string');
+      assertTruthy(
+        !('version_warning' in r),
+        `version mismatch detected (cli=${String(r.cliVersion)}, bridge=${String(r.pluginVersion)}): ${String(
+          r.version_warning
+        )}`
+      );
+      steps.push({
+        label: 'CLI/bridge versions are compatible',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
+    } catch (e) {
+      steps.push({
+        label: 'CLI/bridge versions are compatible',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
   return { name: 'Status Check', steps, skipped: false };
 }
