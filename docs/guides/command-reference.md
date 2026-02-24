@@ -41,7 +41,7 @@ remnote-cli search <query> [options]
 
 ```bash
 remnote-cli search "meeting notes" --text
-remnote-cli search "project" --limit 5 --include-content
+remnote-cli search "project" --limit 5 --include-content markdown
 ```
 
 ## read
