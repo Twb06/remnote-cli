@@ -34,8 +34,9 @@ remnote-cli search <query> [options]
 
 | Option | Description |
 |--------|-------------|
-| `-l, --limit <n>` | Maximum results (default: 10) |
-| `--include-content` | Include note content in results |
+| `-l, --limit <n>` | Maximum results (default: 50) |
+| `--include-content <mode>` | Content mode: `none` (default) or `markdown` |
+| `--depth <n>` | Search content depth when using `--include-content markdown` (default: 1) |
 
 **Examples:**
 
@@ -54,7 +55,7 @@ remnote-cli read <rem-id> [options]
 
 | Option | Description |
 |--------|-------------|
-| `-d, --depth <n>` | Depth of children to include (default: 1) |
+| `-d, --depth <n>` | Depth of children to include (default: 5) |
 
 **Examples:**
 

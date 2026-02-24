@@ -25,13 +25,16 @@ All notable changes to this project will be documented in this file.
 ### Changed
 
 - **BREAKING**: `--include-content` changed from boolean flag to string option (`"none"` or `"markdown"`).
+- **BREAKING**: `detail` field is no longer expected in `search` / `read` JSON responses from the bridge; text output uses `headline` / `title`.
 - Default `--depth` for `read` command increased from 1 to 5.
+- Search content preview default depth is now 1 (CLI `search --depth` help/docs aligned).
 - `search` text output now uses `headline` field for display when available, with aliases shown as `(aka: ...)` suffix.
 - `read` text output restructured: shows headline, type, aliases, card direction, children stats, and rendered content.
 
 ### Documentation
 
 - Added bridge/plugin compatibility warnings and install guidance links for `0.x` version matching, referencing the canonical bridge-side compatibility guide.
+- Updated command reference defaults/options for `search`/`read` depth and `--include-content <mode>`.
 
 ## [0.5.0] - 2026-02-21
 

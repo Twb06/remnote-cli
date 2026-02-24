@@ -38,6 +38,24 @@ describe('command bridge action mapping', () => {
     executeSpy.mockRestore();
   });
 
+  it('maps search command to search with content rendering options', async () => {
+    const executeSpy = await runCommand([
+      'search',
+      'ml',
+      '--include-content',
+      'markdown',
+      '--depth',
+      '1',
+    ]);
+    expect(executeSpy).toHaveBeenCalledWith('search', {
+      query: 'ml',
+      limit: 50,
+      includeContent: 'markdown',
+      depth: 1,
+    });
+    executeSpy.mockRestore();
+  });
+
   it('maps update command to update_note with appendContent payload', async () => {
     const executeSpy = await runCommand([
       'update',
