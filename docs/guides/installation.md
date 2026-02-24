@@ -7,8 +7,13 @@
 
 ## Install from npm
 
+> **Version compatibility (`0.x` semver):** before installing/upgrading, check the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md) and pick a `remnote-cli` version compatible with your installed bridge plugin version.
+
 ```bash
 npm install -g remnote-cli
+
+# Example pinned install when you need a specific compatible version
+npm install -g remnote-cli@0.5.0
 ```
 
 ## Verify Installation
@@ -18,6 +23,8 @@ remnote-cli --version
 ```
 
 ## Build from Source
+
+> Prefer a checkout/tag that matches your installed bridge plugin minor version. See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
 
 ```bash
 git clone https://github.com/robert7/remnote-cli.git

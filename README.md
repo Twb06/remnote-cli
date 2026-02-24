@@ -35,6 +35,8 @@ over a local HTTP control API.
 
 ## Quick Start
 
+> **Version compatibility (`0.x` semver):** install a `remnote-cli` version compatible with your installed RemNote Automation Bridge plugin version. See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+
 ```bash
 npm install -g remnote-cli
 
@@ -59,6 +61,7 @@ remnote-cli daemon stop
 ### Getting Started
 
 - **[Installation Guide](docs/guides/installation.md)** - Prerequisites and install methods
+- **[Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md)** - Match CLI version to installed bridge plugin version (`0.x` semver)
 - **[Daemon Management](docs/guides/daemon-management.md)** - Start, stop, status, logs, and PID behavior
 - **[Demo & Screenshots](docs/demo.md)** - Terminal walkthrough of daemon startup, connection checks, and search
 
@@ -124,6 +127,9 @@ The RemNote Automation Bridge plugin needs to be running in RemNote. Open RemNot
 
 **Stale PID file:**
 If the daemon crashed, `daemon start` will detect the stale PID file and clean it up automatically.
+
+**Commands fail after plugin/CLI upgrade:**
+Check bridge plugin version and `remnote-cli --version`, then install a compatible CLI version (prefer same minor line for `0.x`). See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
 
 ## Related Projects
 

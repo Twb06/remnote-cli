@@ -23,6 +23,16 @@ remnote-cli status --control-port 4100
 3. Is the daemon running on port 3002? (The bridge connects to this port)
 4. Check daemon logs: `remnote-cli daemon start --foreground --log-level debug`
 
+## Version Mismatch After Upgrade
+
+**Symptom:** `status` may show connected, but commands fail after upgrading the bridge plugin or `remnote-cli`.
+
+**Fix:**
+1. Check bridge plugin version in RemNote (or from `status` output if it reports `pluginVersion`).
+2. Check CLI version: `remnote-cli --version`.
+3. Install a compatible CLI version (prefer same minor line for `0.x`).
+4. See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+
 ## Daemon Won't Start
 
 **Symptom:** `daemon start` hangs or times out

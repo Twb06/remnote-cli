@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation
+
+- Added bridge/plugin compatibility warnings and install guidance links for `0.x` version matching, referencing the canonical bridge-side compatibility guide.
+
 ## [0.5.0] - 2026-02-21
 
 ### Added

@@ -8,6 +8,8 @@ cd remnote-cli
 source ./node-check.sh && npm install
 ```
 
+> If you are testing against an existing bridge plugin install, match your local CLI checkout/version to the bridge plugin version line (`0.x` semver). See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+
 ## Development Commands
 
 ```bash
