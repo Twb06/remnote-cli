@@ -18,6 +18,8 @@ All notable changes to this project will be documented in this file.
 ### Enhanced
 
 - `search` command now supports `--include-content <mode>` with `"markdown"` mode for rendered child subtree previews.
+- `search` command now also supports `--include-content structured`, surfacing bridge `contentStructured` results with
+  nested child `remId`s in JSON output for follow-up reads/navigation.
 - `read` command now displays rendered markdown content, aliases, content properties, and type-aware headlines.
 - New options for both commands: `--child-limit`, `--max-content-length`.
 - `search` command shows `headline` (with type-aware delimiters) and `aliases` in text output.
@@ -35,6 +37,7 @@ All notable changes to this project will be documented in this file.
 
 - Added bridge/plugin compatibility warnings and install guidance links for `0.x` version matching, referencing the canonical bridge-side compatibility guide.
 - Updated command reference defaults/options for `search`/`read` depth and `--include-content <mode>`.
+- Updated command reference examples and option docs for `search --include-content structured`.
 
 ## [0.5.0] - 2026-02-21
 

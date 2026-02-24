@@ -24,7 +24,10 @@ export function registerSearchCommand(program: Command): void {
       `Maximum results (default: ${DEFAULT_SEARCH_LIMIT})`,
       String(DEFAULT_SEARCH_LIMIT)
     )
-    .option('--include-content <mode>', 'Content rendering mode: "none" (default) or "markdown"')
+    .option(
+      '--include-content <mode>',
+      'Content rendering mode: "none" (default), "markdown", or "structured"'
+    )
     .option('--depth <n>', 'Depth of child hierarchy to render (default: 1)')
     .option('--child-limit <n>', 'Maximum children per level (default: 20)')
     .option('--max-content-length <n>', 'Maximum content character length (default: 3000)')

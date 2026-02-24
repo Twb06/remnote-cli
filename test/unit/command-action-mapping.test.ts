@@ -56,6 +56,16 @@ describe('command bridge action mapping', () => {
     executeSpy.mockRestore();
   });
 
+  it('passes through structured search content mode', async () => {
+    const executeSpy = await runCommand(['search', 'folders', '--include-content', 'structured']);
+    expect(executeSpy).toHaveBeenCalledWith('search', {
+      query: 'folders',
+      limit: 50,
+      includeContent: 'structured',
+    });
+    executeSpy.mockRestore();
+  });
+
   it('maps update command to update_note with appendContent payload', async () => {
     const executeSpy = await runCommand([
       'update',

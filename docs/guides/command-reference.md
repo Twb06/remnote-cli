@@ -35,14 +35,15 @@ remnote-cli search <query> [options]
 | Option | Description |
 |--------|-------------|
 | `-l, --limit <n>` | Maximum results (default: 50) |
-| `--include-content <mode>` | Content mode: `none` (default) or `markdown` |
-| `--depth <n>` | Search content depth when using `--include-content markdown` (default: 1) |
+| `--include-content <mode>` | Content mode: `none` (default), `markdown`, or `structured` |
+| `--depth <n>` | Search content depth when using `--include-content markdown` or `structured` (default: 1) |
 
 **Examples:**
 
 ```bash
 remnote-cli search "meeting notes" --text
 remnote-cli search "project" --limit 5 --include-content markdown
+remnote-cli search "folders" --include-content structured
 ```
 
 ## read
