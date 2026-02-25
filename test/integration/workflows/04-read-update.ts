@@ -5,8 +5,20 @@
  * Skipped if workflow 03 failed or note IDs are missing.
  */
 
-import { assertHasField, assertTruthy } from '../assertions.js';
+import { assertHasField, assertTruthy, assertEqual } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
+
+function summarizeReadResult(result: Record<string, unknown>): Record<string, unknown> {
+  return {
+    remId: result.remId,
+    title: result.title,
+    keys: Object.keys(result),
+    hasContent: 'content' in result,
+    hasContentProperties: 'contentProperties' in result,
+    contentLength: typeof result.content === 'string' ? result.content.length : undefined,
+    contentProperties: result.contentProperties,
+  };
+}
 
 export async function readUpdateWorkflow(
   ctx: WorkflowContext,
@@ -14,12 +26,17 @@ export async function readUpdateWorkflow(
 ): Promise<WorkflowResult> {
   const steps: StepResult[] = [];
 
-  if (!state.noteAId || !state.noteBId) {
+  if (
+    !state.noteAId ||
+    !state.noteBId ||
+    !state.integrationParentRemId ||
+    !state.integrationParentTitle
+  ) {
     return {
       name: 'Read & Update',
       steps: [
         {
-          label: 'Skipped — missing note IDs from Create & Search',
+          label: 'Skipped — missing note IDs or integration parent from Create & Search/setup',
           passed: false,
           durationMs: 0,
           error: 'Prerequisites not met',
@@ -38,6 +55,18 @@ export async function readUpdateWorkflow(
         unknown
       >;
       assertHasField(result, 'title', 'read note A title');
+      assertHasField(result, 'parentRemId', 'read note A parentRemId');
+      assertHasField(result, 'parentTitle', 'read note A parentTitle');
+      assertEqual(
+        result.parentRemId as string,
+        state.integrationParentRemId as string,
+        'read note A parentRemId should match integration parent'
+      );
+      assertEqual(
+        result.parentTitle as string,
+        state.integrationParentTitle as string,
+        'read note A parentTitle should match integration parent'
+      );
       assertTruthy(
         (result.title as string).includes('[CLI-TEST]'),
         'title should contain test prefix'
@@ -53,22 +82,51 @@ export async function readUpdateWorkflow(
     }
   }
 
-  // Step 2: Read note B
-  {
+  // Step 2-3: Read note B includeContent modes
+  for (const mode of ['markdown', 'none'] as const) {
     const start = Date.now();
+    const label = `Read note B includeContent=${mode} returns expected shape`;
+    let debugResult: Record<string, unknown> | null = null;
     try {
-      const result = (await ctx.cli.runExpectSuccess(['read', state.noteBId])) as Record<
-        string,
-        unknown
-      >;
+      const result = (await ctx.cli.runExpectSuccess([
+        'read',
+        state.noteBId,
+        '--include-content',
+        mode,
+      ])) as Record<string, unknown>;
+      debugResult = result;
       assertHasField(result, 'title', 'read note B title');
-      steps.push({ label: 'Read note B', passed: true, durationMs: Date.now() - start });
+      assertHasField(result, 'remId', 'read note B remId');
+      assertHasField(result, 'parentRemId', 'read note B parentRemId');
+      assertHasField(result, 'parentTitle', 'read note B parentTitle');
+      assertEqual(
+        result.parentRemId as string,
+        state.integrationParentRemId as string,
+        'read note B parentRemId should match integration parent'
+      );
+      assertEqual(
+        result.parentTitle as string,
+        state.integrationParentTitle as string,
+        'read note B parentTitle should match integration parent'
+      );
+      if (mode === 'markdown') {
+        assertHasField(result, 'content', 'read note B markdown');
+        assertTruthy(typeof result.content === 'string', 'content should be string');
+        assertTruthy((result.content as string).length > 0, 'markdown content should be non-empty');
+        assertHasField(result, 'contentProperties', 'read note B contentProperties');
+      } else {
+        assertTruthy(!('content' in result), 'none mode should omit content');
+        assertTruthy(!('contentProperties' in result), 'none mode should omit contentProperties');
+      }
+      steps.push({ label, passed: true, durationMs: Date.now() - start });
     } catch (e) {
       steps.push({
-        label: 'Read note B',
+        label,
         passed: false,
         durationMs: Date.now() - start,
-        error: (e as Error).message,
+        error:
+          `${(e as Error).message} | remId=${JSON.stringify(state.noteBId)} mode=${mode}` +
+          (debugResult ? ` result=${JSON.stringify(summarizeReadResult(debugResult))}` : ''),
       });
     }
   }

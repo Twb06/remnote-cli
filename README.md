@@ -87,6 +87,7 @@ remnote-cli daemon stop
 | `daemon status` | Show daemon process status |
 | `create <title>` | Create a new note |
 | `search <query>` | Search for notes |
+| `search-tag <tag>` | Search for tagged notes with ancestor context |
 | `read <rem-id>` | Read a note by ID |
 | `update <rem-id>` | Update an existing note |
 | `journal <content>` | Append to today's journal |

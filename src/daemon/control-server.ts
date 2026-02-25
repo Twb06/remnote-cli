@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage, ServerResponse, Server } from 'node:http';
 import type { WebSocketServer } from '../websocket/websocket-server.js';
+import { checkVersionCompatibility } from '../version-compat.js';
 import type { Logger } from '../logger.js';
 import type { ControlRequest, ControlResponse, HealthResponse } from '../types/daemon.js';
 
@@ -96,18 +97,61 @@ export class ControlServer {
       body += chunk;
     });
     req.on('end', async () => {
+      let actionForLog: string | undefined;
+      let payloadForLog: unknown;
       try {
         const { action, payload } = JSON.parse(body) as ControlRequest;
+        actionForLog = action;
+        payloadForLog = payload;
         if (!action) {
           this.sendJson(res, 400, { error: 'Missing action field' } as ControlResponse);
           return;
         }
 
         const result = await this.wsServer.sendRequest(action, payload || {});
+
+        // Enrich get_status responses with version info
+        if (action === 'get_status' && typeof result === 'object' && result !== null) {
+          const cliVersion = this.wsServer.getCliVersion();
+          const bridgeVersion = this.wsServer.getBridgeVersion();
+          const resultObj = result as Record<string, unknown>;
+          const fallbackBridgeVersion =
+            typeof resultObj.pluginVersion === 'string' ? resultObj.pluginVersion : null;
+          const effectiveBridgeVersion = bridgeVersion ?? fallbackBridgeVersion;
+          const versionWarning = effectiveBridgeVersion
+            ? checkVersionCompatibility(cliVersion, effectiveBridgeVersion)
+            : null;
+          const enriched = {
+            ...result,
+            cliVersion,
+            ...(versionWarning ? { version_warning: versionWarning } : {}),
+          };
+          this.sendJson(res, 200, { result: enriched } as ControlResponse);
+          return;
+        }
+
         this.sendJson(res, 200, { result } as ControlResponse);
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        this.logger.error({ error: message }, 'Execute failed');
+        const payloadKeys =
+          payloadForLog && typeof payloadForLog === 'object' && !Array.isArray(payloadForLog)
+            ? Object.keys(payloadForLog as Record<string, unknown>)
+            : undefined;
+        const payloadPreview =
+          payloadForLog === undefined
+            ? undefined
+            : typeof payloadForLog === 'object'
+              ? JSON.stringify(payloadForLog)
+              : payloadForLog;
+        this.logger.error(
+          {
+            action: actionForLog,
+            payloadKeys,
+            payloadPreview,
+            error: message,
+          },
+          'Execute failed'
+        );
         this.sendJson(res, 500, { error: message } as ControlResponse);
       }
     });

@@ -2,8 +2,8 @@ import { describe, expect, it, afterEach, beforeEach, vi } from 'vitest';
 import { ControlServer } from '../../src/daemon/control-server.js';
 import pino from 'pino';
 
-const TEST_CONTROL_PORT = 13100;
 const TEST_HOST = '127.0.0.1';
+let testControlPort = 0;
 
 function createSilentLogger() {
   return pino({ level: 'silent' });
@@ -17,13 +17,24 @@ function createMockWsServer(connected = false) {
     stop: vi.fn(),
     onClientConnect: vi.fn(),
     onClientDisconnect: vi.fn(),
+    getBridgeVersion: vi.fn(() => null),
+    getCliVersion: vi.fn(() => '0.5.0'),
   };
 }
 
 async function fetchJson(path: string, options?: RequestInit) {
-  const url = `http://${TEST_HOST}:${TEST_CONTROL_PORT}${path}`;
+  const url = `http://${TEST_HOST}:${testControlPort}${path}`;
   const res = await fetch(url, options);
   return { status: res.status, body: await res.json() };
+}
+
+function getBoundPort(server: ControlServer): number {
+  const httpServer = (server as unknown as { server?: { address: () => unknown } }).server;
+  const address = httpServer?.address();
+  if (!address || typeof address !== 'object' || !('port' in address)) {
+    throw new Error('ControlServer test could not determine bound port');
+  }
+  return address.port as number;
 }
 
 describe('ControlServer', () => {
@@ -33,8 +44,9 @@ describe('ControlServer', () => {
 
   beforeEach(async () => {
     mockWs = createMockWsServer();
-    server = new ControlServer(TEST_CONTROL_PORT, TEST_HOST, mockWs, createSilentLogger());
+    server = new ControlServer(0, TEST_HOST, mockWs, createSilentLogger());
     await server.start();
+    testControlPort = getBoundPort(server);
   });
 
   afterEach(async () => {
@@ -81,6 +93,50 @@ describe('ControlServer', () => {
 
       expect(status).toBe(400);
       expect(body.error).toContain('Missing action');
+    });
+
+    it('enriches get_status with cliVersion', async () => {
+      mockWs.sendRequest.mockResolvedValue({ connected: true, pluginVersion: '0.5.0' });
+      mockWs.getBridgeVersion.mockReturnValue('0.5.0');
+      mockWs.getCliVersion.mockReturnValue('0.5.0');
+
+      const { status, body } = await fetchJson('/execute', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_status', payload: {} }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      expect(status).toBe(200);
+      expect(body.result.cliVersion).toBe('0.5.0');
+      expect(body.result.version_warning).toBeUndefined();
+    });
+
+    it('includes version_warning when bridge version mismatches', async () => {
+      mockWs.sendRequest.mockResolvedValue({ connected: true });
+      mockWs.getBridgeVersion.mockReturnValue('0.6.0');
+      mockWs.getCliVersion.mockReturnValue('0.5.0');
+
+      const { body } = await fetchJson('/execute', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_status', payload: {} }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      expect(body.result.version_warning).toContain('Version mismatch');
+    });
+
+    it('injects version_warning when bridge version null but pluginVersion in result mismatches', async () => {
+      mockWs.sendRequest.mockResolvedValue({ connected: true, pluginVersion: '0.5.0' });
+      mockWs.getBridgeVersion.mockReturnValue(null);
+      mockWs.getCliVersion.mockReturnValue('0.6.0');
+
+      const { body } = await fetchJson('/execute', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get_status', payload: {} }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      expect(body.result.version_warning).toContain('Version mismatch');
     });
 
     it('returns error when WebSocket request fails', async () => {

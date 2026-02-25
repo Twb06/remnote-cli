@@ -34,14 +34,45 @@ remnote-cli search <query> [options]
 
 | Option | Description |
 |--------|-------------|
-| `-l, --limit <n>` | Maximum results (default: 10) |
-| `--include-content` | Include note content in results |
+| `-l, --limit <n>` | Maximum results (default: 50) |
+| `--include-content <mode>` | Content mode: `none` (default), `markdown`, or `structured` |
+| `--depth <n>` | Search content depth when using `--include-content markdown` or `structured` (default: 1) |
+| `--child-limit <n>` | Maximum children per level in rendered content (default: 20) |
+| `--max-content-length <n>` | Maximum rendered content length in markdown mode (default: 3000) |
 
 **Examples:**
 
 ```bash
 remnote-cli search "meeting notes" --text
-remnote-cli search "project" --limit 5 --include-content
+remnote-cli search "project" --limit 5 --include-content markdown
+remnote-cli search "folders" --include-content structured
+```
+
+When `parentTitle`/`parentRemId` are present in search results, `--text` output includes parent context
+(`<- Parent Title [parentRemId]`) to make hierarchy location visible at a glance.
+
+## search-tag
+
+Search for notes by tag and return ancestor-context targets.
+
+```bash
+remnote-cli search-tag <tag> [options]
+```
+
+| Option | Description |
+|--------|-------------|
+| `-l, --limit <n>` | Maximum results (default: 50) |
+| `--include-content <mode>` | Content mode: `none` (default), `markdown`, or `structured` |
+| `--depth <n>` | Search content depth when using `--include-content markdown` or `structured` (default: 1) |
+| `--child-limit <n>` | Maximum children per level in rendered content (default: 20) |
+| `--max-content-length <n>` | Maximum rendered content length in markdown mode (default: 3000) |
+
+**Examples:**
+
+```bash
+remnote-cli search-tag "#daily" --text
+remnote-cli search-tag "project-review" --include-content markdown
+remnote-cli search-tag "weekly" --include-content structured
 ```
 
 ## read
@@ -54,14 +85,20 @@ remnote-cli read <rem-id> [options]
 
 | Option | Description |
 |--------|-------------|
-| `-d, --depth <n>` | Depth of children to include (default: 1) |
+| `-d, --depth <n>` | Depth of children to include (default: 5) |
+| `--include-content <mode>` | Content mode: `markdown` (default) or `none` |
+| `--child-limit <n>` | Maximum children per level (default: 100) |
+| `--max-content-length <n>` | Maximum rendered content length (default: 100000) |
 
 **Examples:**
 
 ```bash
 remnote-cli read abc123def --text
 remnote-cli read abc123def --depth 3
+remnote-cli read abc123def --include-content none --text
 ```
+
+When `parentTitle`/`parentRemId` are present, `--text` output includes a `Parent:` line for quick context.
 
 ## update
 

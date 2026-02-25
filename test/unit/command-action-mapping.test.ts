@@ -38,6 +38,67 @@ describe('command bridge action mapping', () => {
     executeSpy.mockRestore();
   });
 
+  it('maps search command to search with content rendering options', async () => {
+    const executeSpy = await runCommand([
+      'search',
+      'ml',
+      '--include-content',
+      'markdown',
+      '--depth',
+      '1',
+    ]);
+    expect(executeSpy).toHaveBeenCalledWith('search', {
+      query: 'ml',
+      limit: 50,
+      includeContent: 'markdown',
+      depth: 1,
+    });
+    executeSpy.mockRestore();
+  });
+
+  it('passes through structured search content mode', async () => {
+    const executeSpy = await runCommand(['search', 'folders', '--include-content', 'structured']);
+    expect(executeSpy).toHaveBeenCalledWith('search', {
+      query: 'folders',
+      limit: 50,
+      includeContent: 'structured',
+    });
+    executeSpy.mockRestore();
+  });
+
+  it('maps search-tag command to search_by_tag with content rendering options', async () => {
+    const executeSpy = await runCommand([
+      'search-tag',
+      '#daily',
+      '--include-content',
+      'markdown',
+      '--depth',
+      '2',
+    ]);
+    expect(executeSpy).toHaveBeenCalledWith('search_by_tag', {
+      tag: '#daily',
+      limit: 50,
+      includeContent: 'markdown',
+      depth: 2,
+    });
+    executeSpy.mockRestore();
+  });
+
+  it('passes through structured search-tag content mode', async () => {
+    const executeSpy = await runCommand([
+      'search-tag',
+      'project-tag',
+      '--include-content',
+      'structured',
+    ]);
+    expect(executeSpy).toHaveBeenCalledWith('search_by_tag', {
+      tag: 'project-tag',
+      limit: 50,
+      includeContent: 'structured',
+    });
+    executeSpy.mockRestore();
+  });
+
   it('maps update command to update_note with appendContent payload', async () => {
     const executeSpy = await runCommand([
       'update',

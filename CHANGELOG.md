@@ -4,9 +4,66 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Legacy bridge warning**: `status` now injects `version_warning` for legacy bridge plugins (0.5.x) that don't send
+  a `hello` message, by falling back to `pluginVersion` from the `get_status` response.
+- Integration anchor-note reuse now uses deterministic multi-strategy lookup for
+  `RemNote Automation Bridge [temporary integration test data]`:
+  multi-query title search (normalized exact match), then anchor-tag lookup (`remnote-integration-root-anchor`), then create.
+- Integration setup now backfills the anchor tag on reused title-search matches so subsequent runs resolve deterministically.
+- Integration setup now fails early when duplicate exact integration-root titles are detected, printing duplicate `remId`s
+  so test data can be cleaned before execution.
+- Integration runner startup now logs whether the anchor note was found or created, including selected `remId`.
+- Integration `search-tag` scenario now derives expected target from live ancestry traversal of the tagged note
+  (nearest document/daily document fallback), avoiding false negatives when RemNote hierarchy returns document ancestors.
+- Integration tests now pass an explicit `search --include-content <mode>` value and cover all three modes
+  (`markdown`, `structured`, `none`) with response-shape assertions.
+- Integration tests now cover `read --include-content` modes (`markdown`, `none`) with response-shape assertions for
+  `content` / `contentProperties`.
+
+### Added
+
+- **Automatic version compatibility checks**: Daemon receives bridge `hello` message on connect, stores bridge version,
+  and logs a warning if minor versions differ (0.x rule). `status` command output now includes `cliVersion` and
+  `version_warning` (when bridge/CLI minor versions differ).
+- Integration `Status Check` workflow now fails fast when `status` reports a bridge/CLI `version_warning`.
+
+### Enhanced
+
+- `search` command now supports `--include-content <mode>` with `"markdown"` mode for rendered child subtree previews.
+- `search` command now also supports `--include-content structured`, surfacing bridge `contentStructured` results with
+  nested child `remId`s in JSON output for follow-up reads/navigation.
+- Added `search-tag <tag>` command, dispatching `search_by_tag` with the same content-rendering options as `search`
+  (`--include-content`, `--depth`, `--child-limit`, `--max-content-length`).
+- `read` command now displays rendered markdown content, aliases, content properties, and type-aware headlines.
+- `search --text` now includes parent context suffix when available (`<- parentTitle [parentRemId]`).
+- `read --text` now includes a `Parent:` line when parent context is available.
+- New options for both commands: `--child-limit`, `--max-content-length`.
+- `search` command shows `headline` (with type-aware delimiters) and `aliases` in text output.
+- Integration workflows now reuse a shared root-level anchor note
+  `RemNote Automation Bridge [temporary integration test data]` and create all test notes under that parent.
+- Integration Create & Search workflow now also validates `search-tag` with all three `includeContent`
+  modes (`markdown`, `structured`, `none`).
+
+### Changed
+
+- **BREAKING**: `--include-content` changed from boolean flag to string option (`"none"` or `"markdown"`).
+- **BREAKING**: `detail` field is no longer expected in `search` / `read` JSON responses from the bridge; text output uses `headline` / `title`.
+- Default `--depth` for `read` command increased from 1 to 5.
+- Search content preview default depth is now 1 (CLI `search --depth` help/docs aligned).
+- `search` text output now uses `headline` field for display when available, with aliases shown as `(aka: ...)` suffix.
+- `read` text output restructured: shows headline, type, aliases, card direction, children stats, and rendered content.
+- Standardized root shell script bootstrapping so Node-dependent scripts source `node-check.sh` via script-dir paths at startup (including `publish-to-npm.sh`).
+
 ### Documentation
 
 - Added bridge/plugin compatibility warnings and install guidance links for `0.x` version matching, referencing the canonical bridge-side compatibility guide.
+- Updated command reference defaults/options for `search`/`read` depth and `--include-content <mode>`.
+- Updated command reference examples and option docs for `search --include-content structured`.
+- Updated command reference and README command tables for new `search-tag` command.
+- Updated integration testing guide to document shared integration-anchor reuse behavior and `search-tag` coverage.
+- Updated `AGENTS.md` integration-test policy wording to explicitly require manual human execution for integration tests.
 
 ## [0.5.0] - 2026-02-21
 
