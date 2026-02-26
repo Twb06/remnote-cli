@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 
 - Expanded `docs/guides/command-reference.md` to fully document daemon subcommands, global flags, option defaults,
   option-interaction rules, exit codes, and representative usage patterns for automation consumers.
+- Rewrote `AGENTS.md` as a concise repo map and aligned it to the shared cross-repo section template, matching current
+  daemon command/contract guidance and removing stale or contradictory instruction detail.
 
 ## [0.6.0] - 2026-02-25
 

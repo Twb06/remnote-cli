@@ -1,118 +1,108 @@
 # AGENTS.md
 
-This file provides guidance to AI agents when working with code in this repository.
+This file is a map for AI agents working in `remnote-cli`.
 
-## CRITICAL: Companion Project Context
+## Start Here First (Mandatory)
 
-When additional context is needed, agents SHOULD also inspect the two companion projects:
+Read these before making changes:
 
-- Resolve from this repo root (`$(pwd)`): companion repos are sibling directories at `$(pwd)/../...`.
-- `$(pwd)/../remnote-mcp-bridge` - RemNote plugin bridge layer; authoritative for WebSocket action names/payload
-  contracts used by this CLI.
-- `$(pwd)/../remnote-mcp-server` - MCP server companion; useful for shared bridge-contract usage patterns,
-  architecture, and troubleshooting flow.
+1. `.agents/dev-requirements.md`
+2. `.agents/dev-workflow.md`
+3. `.agents/dev-documentation.md` (required before docs edits)
+4. `.agents/dev-python-conventions.md` (if touching Python helper scripts)
+5. `.agents/PLANS.md` (required for complex work / major refactors)
 
-These repos define bridge action contracts and adjacent architecture decisions used by this CLI.
+## Repo Role
 
-Terminology aliases used across docs and discussions:
-
-- `remnote-mcp-server` = "MCP server" (same project)
-- `remnote-mcp-bridge` = "MCP bridge" or "bridge plugin" (same project)
-- `remnote-cli` = "CLI companion app" (this repository)
-
-## Project Overview
-
-This is a CLI companion app for the RemNote Automation Bridge plugin. It provides a daemon-backed command-line interface for
-agentic workflows (for example OpenClaw integrations), with JSON-first output for machine consumers.
-
-**Current architecture:**
+This repo is the CLI companion app for the RemNote bridge plugin. It uses a daemon model:
 
 ```text
-CLI commands (short-lived) ↔ HTTP Control API :3100 ↔ CLI daemon ↔ WebSocket :3002 ↔ RemNote Automation Bridge plugin ↔ RemNote
+CLI commands (short-lived) <-> HTTP control API (:3100) <-> daemon <-> WebSocket (:3002) <-> bridge plugin
 ```
 
-## Scope and Direction
+JSON output is the default mode for automation consumers.
 
-- This repository is the second companion app to `remnote-mcp-bridge`.
-- The first companion app is `remnote-mcp-server`.
-- Core daemon lifecycle and bridge command flows are implemented (`create`, `search`, `read`, `update`, `journal`,
-  `status`, plus `daemon start|stop|status`).
-- Current focus is reliability, docs quality, and release workflow maturity.
-- Integration test workflows exist for live RemNote validation (`test/integration/` and `run-integration-test.sh`).
+## Companion Repos (Sibling Dirs)
 
-## MANDATORY: Code Change Requirements
+Resolve from this repo root (`$(pwd)`):
 
-ALL code changes MUST follow these requirements:
+- `$(pwd)/../remnote-mcp-bridge` - authoritative bridge actions + payload/response contracts
+- `$(pwd)/../remnote-mcp-server` - sibling consumer with shared contract and compatibility logic
 
-1. Tests - update/add tests for behavior changes when test coverage exists for the affected area
-2. Documentation - update docs where applicable
-3. Code quality - run linting/format/type checks
-4. Verification - run the relevant checks to verify behavior
-5. CHANGELOG.md - document functional and documentation changes
+When bridge contracts change, validate all three repos.
 
-See `.agents/dev-requirements.md` for detailed planning and execution guidelines.
+## Contract Map (Current)
 
-## CRITICAL: Integration Test Execution Policy
+### External CLI Command Surface
 
-AI agents MUST NEVER run integration tests in this repository.
+- Daemon lifecycle: `daemon start`, `daemon stop`, `daemon status`
+- Bridge commands: `create`, `search`, `search-tag`, `read`, `update`, `journal`, `status`
 
-- Do not run `./run-integration-test.sh`
-- Do not run `npm run test:integration`
-- Do run unit/static checks (`typecheck`, `lint`, unit tests) as needed
-- Ask the human collaborator to run integration tests manually and share logs when integration verification is required
+### Bridge Mapping and Compatibility
 
-## MANDATORY: Documentation Change Requirements
+- CLI bridge actions include `search_by_tag` and `get_status`.
+- Bridge plugin sends WebSocket `hello` with plugin version.
+- `status` output may include `cliVersion` and `version_warning`.
+- Projects are `0.x`; prefer same minor line across bridge/server/CLI.
+  - See `../remnote-mcp-bridge/docs/guides/bridge-consumer-version-compatibility.md`.
 
-Before making ANY documentation change, read `.agents/dev-documentation.md`.
+## Code Map
 
-ALL documentation changes MUST be documented in `CHANGELOG.md`.
+- `src/cli.ts` - top-level command wiring and global options
+- `src/commands/*.ts` - command argument mapping and output handling
+- `src/daemon/daemon-server.ts` - daemon runtime composition
+- `src/daemon/control-server.ts` - control API (`/health`, `/execute`, `/shutdown`)
+- `src/websocket/websocket-server.ts` - bridge WS server + request lifecycle
+- `src/client/daemon-client.ts` - CLI-to-daemon HTTP client
+- `src/version-compat.ts` - compatibility warning logic
 
-## CRITICAL: ExecPlans
+Primary docs for deeper context:
 
-When writing complex features or significant refactors, use an ExecPlan (as described in `.agents/PLANS.md`) from
-design to implementation.
+- `docs/architecture.md`
+- `docs/guides/command-reference.md`
+- `docs/guides/daemon-management.md`
+- `docs/guides/troubleshooting.md`
 
-## CRITICAL: Git Commit Policy
+## Development and Verification
 
-DO NOT create git commits unless explicitly requested by the user.
-
-- You may use `git add`, `git rm`, `git mv`, and other git commands
-- You may stage changes and prepare them for commit
-- DO NOT run `git commit` unless asked
-
-See `.agents/dev-workflow.md` for the full workflow details.
-
-## Development Environment
-
-Use `node-check.sh` to ensure Node.js is available through PATH or nvm:
+If Node/npm is unavailable in shell:
 
 ```bash
-source ./node-check.sh && npm install
-source ./node-check.sh && npm run build
-source ./node-check.sh && ./code-quality.sh
+source ./node-check.sh
 ```
 
-## Development Commands
+Core commands:
 
 ```bash
-npm install
 npm run dev
+npm run dev:watch
 npm run build
-npm start
 npm run typecheck
 npm test
-npm run lint
-npm run format:check
-npm run test:integration
+npm run test:coverage
 ./code-quality.sh
 ```
 
-## Publishing
+## Integration and Live Validation Policy
 
-Use the automated workflow:
+AI agents must not run integration tests in this repo.
 
-```bash
-./publish-to-npm.sh
-```
+- Do not run `npm run test:integration`.
+- Do not run `./run-integration-test.sh`.
+- Ask the human collaborator to run integration tests and share logs.
+- Use unit/static checks for agent-side verification.
 
-The script runs quality checks, verifies package contents, performs dry-runs, and publishes with confirmation.
+## Documentation and Changelog Rules
+
+- Before docs edits, read `.agents/dev-documentation.md`.
+- Any functional or documentation change must be recorded in `CHANGELOG.md`.
+- Keep AGENTS/docs map-level: contracts, rationale, and navigation.
+
+## Release and Publishing Map
+
+- Publish workflow: `./publish-to-npm.sh`
+- Keep release notes aligned with `CHANGELOG.md`
+
+## Git Policy
+
+Do not create commits unless explicitly requested. Use `.agents/dev-workflow.md` as canonical policy.
