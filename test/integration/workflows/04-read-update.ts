@@ -126,7 +126,10 @@ export async function readUpdateWorkflow(
           'structured mode contentStructured should be non-empty'
         );
         assertTruthy(!('content' in result), 'structured mode should omit markdown content');
-        assertTruthy(!('contentProperties' in result), 'structured mode should omit contentProperties');
+        assertTruthy(
+          !('contentProperties' in result),
+          'structured mode should omit contentProperties'
+        );
       } else {
         assertTruthy(!('content' in result), 'none mode should omit content');
         assertTruthy(!('contentStructured' in result), 'none mode should omit structured content');
