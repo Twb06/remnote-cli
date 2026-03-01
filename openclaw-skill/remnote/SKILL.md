@@ -58,6 +58,16 @@ If any precondition is missing, stop and fix setup first.
 - For writes (`create`, `update`, `journal`), require the exact phrase `confirm write` from the user in the same turn.
 - If `confirm write` is not present, ask for confirmation and do not execute writes.
 
+## Command Invocation Rule (critical)
+
+- Run exactly one `remnote-cli` command per execution.
+- Invoke `remnote-cli` directly; do not chain shell commands.
+- Do not use `&&`, `|`, `;`, subshells (`(...)`), command substitution (`$()`), `xargs`, or `echo` pipelines.
+- WRONG: `remnote-cli daemon status --text && echo '---' && remnote-cli status --text`
+- RIGHT: `remnote-cli daemon status --text`
+- RIGHT: `remnote-cli status --text`
+- Reason: command chaining can trigger exec approvals and break automation flow.
+
 ## Compatibility Check (mandatory before real work)
 
 1. Check daemon and bridge connectivity:
