@@ -1,6 +1,19 @@
-import { describe, expect, it, vi, type MockInstance } from 'vitest';
+import { afterEach, describe, expect, it, vi, type MockInstance } from 'vitest';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { DaemonClient } from '../../src/client/daemon-client.js';
 import { createProgram } from '../../src/cli.js';
+
+const tempDirs: string[] = [];
+
+async function createTempContentFile(content: string): Promise<string> {
+  const dir = await mkdtemp(join(tmpdir(), 'remnote-cli-command-map-'));
+  tempDirs.push(dir);
+  const path = join(dir, 'content.md');
+  await writeFile(path, content, 'utf8');
+  return path;
+}
 
 async function runCommand(args: string[]): Promise<MockInstance> {
   const executeSpy = vi.spyOn(DaemonClient.prototype, 'execute').mockResolvedValue({ ok: true });
@@ -14,6 +27,10 @@ async function runCommand(args: string[]): Promise<MockInstance> {
 }
 
 describe('command bridge action mapping', () => {
+  afterEach(async () => {
+    await Promise.all(tempDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
+  });
+
   it('maps create command to create_note', async () => {
     const executeSpy = await runCommand([
       'create',
@@ -28,6 +45,16 @@ describe('command bridge action mapping', () => {
       title: 'Test Title',
       content: 'Body',
       tags: ['tag-a', 'tag-b'],
+    });
+    executeSpy.mockRestore();
+  });
+
+  it('maps create --content-file to create_note content payload', async () => {
+    const filePath = await createTempContentFile('Body from file');
+    const executeSpy = await runCommand(['create', 'Title', '--content-file', filePath]);
+    expect(executeSpy).toHaveBeenCalledWith('create_note', {
+      title: 'Title',
+      content: 'Body from file',
     });
     executeSpy.mockRestore();
   });
@@ -126,11 +153,40 @@ describe('command bridge action mapping', () => {
     executeSpy.mockRestore();
   });
 
+  it('maps update --append-file to update_note appendContent payload', async () => {
+    const filePath = await createTempContentFile('Append from file');
+    const executeSpy = await runCommand(['update', 'abc123', '--append-file', filePath]);
+    expect(executeSpy).toHaveBeenCalledWith('update_note', {
+      remId: 'abc123',
+      appendContent: 'Append from file',
+    });
+    executeSpy.mockRestore();
+  });
+
   it('maps journal command to append_journal', async () => {
     const executeSpy = await runCommand(['journal', 'Entry', '--no-timestamp']);
     expect(executeSpy).toHaveBeenCalledWith('append_journal', {
       content: 'Entry',
       timestamp: false,
+    });
+    executeSpy.mockRestore();
+  });
+
+  it('maps journal --content to append_journal', async () => {
+    const executeSpy = await runCommand(['journal', '--content', 'Entry from flag']);
+    expect(executeSpy).toHaveBeenCalledWith('append_journal', {
+      content: 'Entry from flag',
+      timestamp: true,
+    });
+    executeSpy.mockRestore();
+  });
+
+  it('maps journal --content-file to append_journal', async () => {
+    const filePath = await createTempContentFile('Journal from file');
+    const executeSpy = await runCommand(['journal', '--content-file', filePath]);
+    expect(executeSpy).toHaveBeenCalledWith('append_journal', {
+      content: 'Journal from file',
+      timestamp: true,
     });
     executeSpy.mockRestore();
   });

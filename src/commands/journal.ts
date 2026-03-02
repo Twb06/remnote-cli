@@ -2,18 +2,27 @@ import { Command } from 'commander';
 import { DaemonClient } from '../client/daemon-client.js';
 import { formatResult, formatError, type OutputFormat } from '../output/formatter.js';
 import { EXIT } from '../config.js';
+import { resolveJournalContent } from './content-input.js';
 
 export function registerJournalCommand(program: Command): void {
   program
-    .command('journal <content>')
+    .command('journal [content]')
     .description("Append an entry to today's journal")
+    .option('--content <text>', 'Journal entry content')
+    .option('--content-file <path>', 'Read journal entry from UTF-8 file ("-" for stdin)')
     .option('--no-timestamp', 'Omit timestamp prefix')
-    .action(async (content: string, opts) => {
+    .action(async (positionalContent: string | undefined, opts) => {
       const globalOpts = program.opts();
       const format: OutputFormat = globalOpts.text ? 'text' : 'json';
       const client = new DaemonClient(parseInt(globalOpts.controlPort, 10));
 
       try {
+        const content = await resolveJournalContent({
+          positionalContent,
+          optionContent: opts.content as string | undefined,
+          contentFile: opts.contentFile as string | undefined,
+        });
+
         const payload: Record<string, unknown> = {
           content,
           timestamp: opts.timestamp !== false,

@@ -4,8 +4,25 @@
  * Appends entries to today's daily document via the CLI.
  */
 
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { assertHasField } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
+
+async function withTempContentFile<T>(
+  content: string,
+  fn: (path: string) => Promise<T>
+): Promise<T> {
+  const dir = await mkdtemp(join(tmpdir(), 'remnote-cli-it-journal-'));
+  const path = join(dir, 'entry.md');
+  try {
+    await writeFile(path, content, 'utf8');
+    return await fn(path);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}
 
 export async function journalWorkflow(
   ctx: WorkflowContext,
@@ -17,10 +34,14 @@ export async function journalWorkflow(
   {
     const start = Date.now();
     try {
-      const result = (await ctx.cli.runExpectSuccess([
-        'journal',
+      const result = (await withTempContentFile(
         `[CLI-TEST] Journal entry with timestamp ${ctx.runId}`,
-      ])) as Record<string, unknown>;
+        async (contentPath) =>
+          (await ctx.cli.runExpectSuccess(['journal', '--content-file', contentPath])) as Record<
+            string,
+            unknown
+          >
+      )) as Record<string, unknown>;
       assertHasField(result, 'remId', 'journal append with timestamp');
       steps.push({ label: 'Append with timestamp', passed: true, durationMs: Date.now() - start });
     } catch (e) {
@@ -37,11 +58,16 @@ export async function journalWorkflow(
   {
     const start = Date.now();
     try {
-      const result = (await ctx.cli.runExpectSuccess([
-        'journal',
+      const result = (await withTempContentFile(
         `[CLI-TEST] No-timestamp entry ${ctx.runId}`,
-        '--no-timestamp',
-      ])) as Record<string, unknown>;
+        async (contentPath) =>
+          (await ctx.cli.runExpectSuccess([
+            'journal',
+            '--content-file',
+            contentPath,
+            '--no-timestamp',
+          ])) as Record<string, unknown>
+      )) as Record<string, unknown>;
       assertHasField(result, 'remId', 'journal append without timestamp');
       steps.push({
         label: 'Append without timestamp',

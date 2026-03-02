@@ -47,7 +47,7 @@ remnote-cli daemon start
 remnote-cli status --text
 
 # Create a note
-remnote-cli create "My Note" --content "Hello from the CLI" --text
+remnote-cli create "My Note" --content-file /tmp/my-note.md --text
 
 # Search
 remnote-cli search "My Note" --text
@@ -90,7 +90,7 @@ remnote-cli daemon stop
 | `search-tag <tag>` | Search for tagged notes with ancestor context |
 | `read <rem-id>` | Read a note by ID |
 | `update <rem-id>` | Update an existing note |
-| `journal <content>` | Append to today's journal |
+| `journal [content]` | Append to today's journal |
 | `status` | Check bridge connection status |
 
 ## Global Options

@@ -75,6 +75,16 @@ If any precondition is missing, stop and fix setup first.
 - RIGHT: `remnote-cli status --text`
 - Reason: command chaining can trigger exec approvals and break automation flow.
 
+## Write Payload Rule (allowlist-friendly)
+
+- For write commands, prefer file-based payload flags:
+  - `--content-file <path|->` for `create` / `journal`
+  - `--append-file <path|->` for `update`
+- Keep executed command strings short and predictable for OpenClaw allowlisting.
+- Inline `--content` / `--append` and positional `journal [content]` are discouraged except for very short single-line
+  text.
+- `-` (stdin) is supported but discouraged by default in OpenClaw flows because command context can be less explicit.
+
 ## Compatibility Check (mandatory before real work)
 
 1. Check daemon and bridge connectivity:
@@ -131,9 +141,10 @@ If any precondition is missing, stop and fix setup first.
 
 ### Mutating Operations (only after `confirm write`)
 
-- Create: `remnote-cli create "Title" --content "Body" --text`
-- Update: `remnote-cli update <rem-id> --title "New Title" --append "More text" --text`
-- Journal: `remnote-cli journal "Entry text" --text`
+- Create (preferred): `remnote-cli create "Title" --content-file /tmp/body.md --text`
+- Update (preferred): `remnote-cli update <rem-id> --title "New Title" --append-file /tmp/append.md --text`
+- Journal (preferred): `remnote-cli journal --content-file /tmp/entry.md --text`
+- Fallbacks (discouraged): inline flags or positional `journal [content]` for short single-line text only.
 
 ## Failure Handling
 

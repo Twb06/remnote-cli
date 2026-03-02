@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Added file/stdin payload input for write commands to keep command invocations short and allowlist-friendly:
+  - `create --content-file <path|->`
+  - `update --append-file <path|->`
+  - `journal --content-file <path|->`
+- Added `journal --content <text>` while keeping backward-compatible positional `journal [content]`.
+- Added a shared 100 KB content-size guard for file/stdin write payloads with clear read/size error messages.
+- Added planning note `docs/TODO-add-replace.md` describing future `--replace` / `--replace-file` semantics and
+  required cross-repo contract work.
+
+### Changed
+
+- Updated command docs and README examples to prefer file-based write payload flags.
+- Updated OpenClaw `remnote` skill guidance to prefer file-based write payloads and mark inline/positional/stdin forms
+  as discouraged defaults.
+
+### Fixed
+
+- Added regression tests for write payload file/stdin handling, mutual-exclusion validation, and journal content-source
+  contract enforcement.
+
 ## [0.7.0] - 2026-03-01
 
 ### Added

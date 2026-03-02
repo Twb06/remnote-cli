@@ -5,6 +5,9 @@
  * Skipped if workflow 03 failed or note IDs are missing.
  */
 
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { assertHasField, assertTruthy, assertEqual } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
@@ -19,6 +22,20 @@ function summarizeReadResult(result: Record<string, unknown>): Record<string, un
     contentLength: typeof result.content === 'string' ? result.content.length : undefined,
     contentProperties: result.contentProperties,
   };
+}
+
+async function withTempContentFile<T>(
+  content: string,
+  fn: (path: string) => Promise<T>
+): Promise<T> {
+  const dir = await mkdtemp(join(tmpdir(), 'remnote-cli-it-update-'));
+  const path = join(dir, 'append.md');
+  try {
+    await writeFile(path, content, 'utf8');
+    return await fn(path);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
 }
 
 export async function readUpdateWorkflow(
@@ -152,12 +169,16 @@ export async function readUpdateWorkflow(
   {
     const start = Date.now();
     try {
-      const result = (await ctx.cli.runExpectSuccess([
-        'update',
-        state.noteAId,
-        '--append',
+      const result = (await withTempContentFile(
         'Appended by CLI integration test',
-      ])) as Record<string, unknown>;
+        async (contentPath) =>
+          (await ctx.cli.runExpectSuccess([
+            'update',
+            state.noteAId,
+            '--append-file',
+            contentPath,
+          ])) as Record<string, unknown>
+      )) as Record<string, unknown>;
       assertHasField(result, 'remId', 'update note A');
       steps.push({ label: 'Update note A (append)', passed: true, durationMs: Date.now() - start });
     } catch (e) {

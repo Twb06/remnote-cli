@@ -131,14 +131,23 @@ remnote-cli create <title> [options]
 | Option | Default | Description |
 |--------|---------|-------------|
 | `-c, --content <text>` | none | Initial content |
+| `--content-file <path>` | none | Read initial content from UTF-8 file (`-` for stdin) |
 | `--parent-id <id>` | none | Parent Rem ID |
 | `-t, --tags <tag...>` | none | One or more tags |
+
+Behavior rules:
+
+- `--content` and `--content-file` are mutually exclusive.
+- Content loaded from file/stdin is passed verbatim (no templating/interpolation).
+- Write content from `--content-file`/`--append-file`/stdin is capped at 100 KB.
 
 Examples:
 
 ```bash
 remnote-cli create "Meeting Notes"
 remnote-cli create "Project Plan" --content "Phase 1" --tags planning work --text
+remnote-cli create "Weekly Summary" --content-file /tmp/weekly-summary.md --text
+cat /tmp/weekly-summary.md | remnote-cli create "Weekly Summary" --content-file - --text
 ```
 
 ## search
@@ -233,6 +242,7 @@ remnote-cli update <rem-id> [options]
 |--------|---------|-------------|
 | `--title <text>` | none | Replace title/headline |
 | `--append <text>` | none | Append content |
+| `--append-file <path>` | none | Read appended content from UTF-8 file (`-` for stdin) |
 | `--add-tags <tag...>` | none | Add one or more tags |
 | `--remove-tags <tag...>` | none | Remove one or more tags |
 
@@ -240,12 +250,15 @@ Behavior rules:
 
 - Options can be combined in one call (title/content/tag updates in one request).
 - At least one update field should be provided.
+- `--append` and `--append-file` are mutually exclusive.
 
 Examples:
 
 ```bash
 remnote-cli update abc123def --title "Updated Title"
 remnote-cli update abc123def --title "Final" --append "Shipped" --add-tags important --remove-tags draft --text
+remnote-cli update abc123def --append-file /tmp/follow-up.md --text
+cat /tmp/follow-up.md | remnote-cli update abc123def --append-file - --text
 ```
 
 ## journal
@@ -253,18 +266,29 @@ remnote-cli update abc123def --title "Final" --append "Shipped" --add-tags impor
 Append to today's daily document.
 
 ```bash
-remnote-cli journal <content> [options]
+remnote-cli journal [content] [options]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
+| `--content <text>` | none | Journal entry content |
+| `--content-file <path>` | none | Read journal entry from UTF-8 file (`-` for stdin) |
 | `--no-timestamp` | timestamp enabled | Disable `[HH:MM:SS]` prefix |
+
+Behavior rules:
+
+- Provide exactly one content source:
+  - positional `[content]` (backward-compatible)
+  - `--content <text>`
+  - `--content-file <path|->`
 
 Examples:
 
 ```bash
 remnote-cli journal "Finished sprint review"
-remnote-cli journal "Quick thought" --no-timestamp --text
+remnote-cli journal --content "Quick thought" --no-timestamp --text
+remnote-cli journal --content-file /tmp/entry.md --text
+cat /tmp/entry.md | remnote-cli journal --content-file - --text
 ```
 
 ## status

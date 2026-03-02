@@ -5,10 +5,27 @@
  * Stores note IDs in shared state for downstream workflows.
  */
 
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { assertHasField, assertTruthy, assertIsArray, assertEqual } from '../assertions.js';
 import type { WorkflowContext, WorkflowResult, SharedState, StepResult } from '../types.js';
 
 const INDEXING_DELAY_MS = parseInt(process.env.CLI_TEST_DELAY ?? '2000', 10);
+
+async function withTempContentFile<T>(
+  content: string,
+  fn: (path: string) => Promise<T>
+): Promise<T> {
+  const dir = await mkdtemp(join(tmpdir(), 'remnote-cli-it-create-'));
+  const path = join(dir, 'content.md');
+  try {
+    await writeFile(path, content, 'utf8');
+    return await fn(path);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+}
 
 function summarizeSearchResults(
   results: Array<Record<string, unknown>>
@@ -194,16 +211,18 @@ export async function createSearchWorkflow(
   {
     const start = Date.now();
     try {
-      const result = (await ctx.cli.runExpectSuccess([
-        'create',
-        `[CLI-TEST] Rich Note ${ctx.runId}`,
-        '--parent-id',
-        state.integrationParentRemId,
-        '--content',
-        'This is test content',
-        '--tags',
-        state.searchByTagTag,
-      ])) as Record<string, unknown>;
+      const result = (await withTempContentFile('This is test content', async (contentPath) => {
+        return (await ctx.cli.runExpectSuccess([
+          'create',
+          `[CLI-TEST] Rich Note ${ctx.runId}`,
+          '--parent-id',
+          state.integrationParentRemId,
+          '--content-file',
+          contentPath,
+          '--tags',
+          state.searchByTagTag,
+        ])) as Record<string, unknown>;
+      })) as Record<string, unknown>;
       assertHasField(result, 'remId', 'create rich note');
       state.noteBId = result.remId as string;
       steps.push({ label: 'Create rich note', passed: true, durationMs: Date.now() - start });
