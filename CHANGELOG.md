@@ -31,6 +31,8 @@ All notable changes to this project will be documented in this file.
 - Added regression tests for write payload file/stdin handling, mutual-exclusion validation, and journal content-source
   contract enforcement.
 - Added regression tests for update replace payload mapping and update append-vs-replace conflict handling.
+- Stabilized networked unit tests (`websocket-server` and `daemon-client`) by using dynamically allocated localhost
+  ports instead of fixed ports to avoid intermittent CI `EADDRINUSE` failures.
 
 ## [0.7.0] - 2026-03-01
 

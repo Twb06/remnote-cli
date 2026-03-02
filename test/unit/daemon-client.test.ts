@@ -1,16 +1,18 @@
 import { describe, expect, it, afterEach, beforeEach, vi } from 'vitest';
 import { createServer, Server, IncomingMessage, ServerResponse } from 'node:http';
 import { DaemonClient } from '../../src/client/daemon-client.js';
+import { getAvailablePort } from '../helpers/network.js';
 
-const TEST_PORT = 13200;
 const TEST_HOST = '127.0.0.1';
 
 describe('DaemonClient', () => {
   let mockServer: Server;
   let client: DaemonClient;
   let requestHandler: (req: IncomingMessage, res: ServerResponse) => void;
+  let testPort: number;
 
   beforeEach(async () => {
+    testPort = await getAvailablePort(TEST_HOST);
     requestHandler = (_req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end('{}');
@@ -18,10 +20,10 @@ describe('DaemonClient', () => {
 
     mockServer = createServer((req, res) => requestHandler(req, res));
     await new Promise<void>((resolve) => {
-      mockServer.listen(TEST_PORT, TEST_HOST, resolve);
+      mockServer.listen(testPort, TEST_HOST, resolve);
     });
 
-    client = new DaemonClient(TEST_PORT, TEST_HOST);
+    client = new DaemonClient(testPort, TEST_HOST);
   });
 
   afterEach(async () => {
@@ -99,7 +101,8 @@ describe('DaemonClient', () => {
 
   describe('connection error', () => {
     it('throws descriptive error when daemon is not running', async () => {
-      const deadClient = new DaemonClient(19999, TEST_HOST);
+      const deadPort = await getAvailablePort(TEST_HOST);
+      const deadClient = new DaemonClient(deadPort, TEST_HOST);
       await expect(deadClient.health()).rejects.toThrow('Cannot connect to daemon');
     });
   });
