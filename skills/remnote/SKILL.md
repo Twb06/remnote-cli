@@ -1,6 +1,6 @@
 ---
 name: remnote
-description: Read/search RemNote notes via `remnote-cli` by default; require `confirm write` before create/update/journal.
+description: Search, read, and write RemNote notes and personal knowledge base content via `remnote-cli`. Use for note-taking, journaling, tags, and knowledge-base navigation; require `confirm write` before create/update/journal.
 homepage: https://github.com/robert7/remnote-cli
 metadata:
   {

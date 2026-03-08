@@ -10,6 +10,8 @@ All notable changes to this project will be documented in this file.
   the ClawHub upload script path.
 - Extended `./code-quality.sh` to validate and package every committed skill under `skills/` using the local
   `skill-creator` tooling before running the Node test suite.
+- Improved RemNote skill marketplace discoverability by expanding note/knowledge-base keywords in
+  `skills/remnote/SKILL.md` and publishing it with the display name `RemNote Notes`.
 
 ## [0.8.0] - 2026-03-04
 

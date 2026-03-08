@@ -59,7 +59,7 @@ fi
 
 VERSION="$(cd "${REPO_ROOT}" && node -p "require('./package.json').version")"
 SLUG="remnote"
-NAME="RemNote"
+NAME="RemNote Notes"
 TAGS="latest"
 CHANGELOG_TEXT="Sync from remnote-cli v${VERSION}"
 
