@@ -327,7 +327,7 @@ export async function createSearchWorkflow(
     try {
       const result = (await ctx.cli.runExpectSuccess([
         'search',
-        `[CLI-TEST] ${ctx.runId}`,
+        `${ctx.runId}`,
       ])) as Record<string, unknown>;
       assertHasField(result, 'results', 'search results');
       assertIsArray(result.results, 'search results');
@@ -355,7 +355,7 @@ export async function createSearchWorkflow(
   for (const mode of ['markdown', 'structured', 'none'] as const) {
     const start = Date.now();
     const label = `Search includeContent=${mode} returns expected shape`;
-    const query = `[CLI-TEST] ${ctx.runId}`;
+    const query = `${ctx.runId}`;
     let debugResults: Array<Record<string, unknown>> | null = null;
     try {
       const result = (await ctx.cli.runExpectSuccess([
