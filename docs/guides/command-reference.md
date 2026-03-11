@@ -134,6 +134,9 @@ remnote-cli create <title> [options]
 | `--content-file <path>` | none | Read initial content from UTF-8 file (`-` for stdin) |
 | `--parent-id <id>` | none | Parent Rem ID |
 | `-t, --tags <tag...>` | none | One or more tags |
+| `-b, --back-text <text>`| none | Back text for flashcard |
+| `--concept` | false | Create as a Concept card |
+| `--descriptor` | false | Create as a Descriptor card |
 
 Behavior rules:
 
@@ -148,6 +151,37 @@ remnote-cli create "Meeting Notes"
 remnote-cli create "Project Plan" --content "Phase 1" --tags planning work --text
 remnote-cli create "Weekly Summary" --content-file /tmp/weekly-summary.md --text
 cat /tmp/weekly-summary.md | remnote-cli create "Weekly Summary" --content-file - --text
+remnote-cli create "Photosynthesis" --back-text "Process by which plants make food" --concept --text
+```
+
+## create-md
+
+Create a hierarchical note tree in RemNote from a markdown string (indented bullets). Automatically parses indentations into parent-child Rem relationships using RemNote's native capabilities.
+
+```bash
+remnote-cli create-md [options]
+```
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `-c, --content <text>` | none | Markdown text containing the bulleted tree, flashcards inline supported |
+| `--content-file <path>`| none | Read markdown content from UTF-8 file (`-` for stdin) |
+| `--title <text>` | none | Optional root Rem title to enclose the entire tree |
+| `--parent-id <id>` | none | Parent Rem ID where the tree will be created |
+| `-t, --tags <tag...>` | none | Array of tags to apply to the root/title Rem |
+
+Behavior rules:
+
+- `--content` or `--content-file` is required.
+- Provide a `title` if you want all items nested logically under a single new Rem.
+- Use `- ` or `* ` for each bullet and use leading spaces for nesting levels
+- You can batch create flashcards inline using `::` for Concept cards and `;;` for Descriptor cards. Refer to https://help.remnote.com/en/articles/9252072-how-to-import-flashcards-from-text#h_fc1588b3b7 for more information.
+
+Examples:
+
+```bash
+remnote-cli create-md --content "- Programming Languages\n  - Python\n  - JavaScript"
+remnote-cli create-md --title "Biology Terms" --content-file /tmp/biology.md --text
 ```
 
 ## search

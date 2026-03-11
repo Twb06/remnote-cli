@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+
+- Enhanced `create` command with flashcard support (`-b/--back-text`, `--concept`, `--descriptor`).
+- Added `create-md` command to allow creating native hierarchical Rem structures (including flashcards via `::`) from indented markdown strings.
+
 ### Changed
 
 - Renamed the local OpenClaw skill package directory to `skills/` and updated live repository references, including
