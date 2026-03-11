@@ -236,10 +236,92 @@ export async function createSearchWorkflow(
     }
   }
 
+  // Step 3: Create flashcard note (with back-text)
+  {
+    const start = Date.now();
+    try {
+      const result = (await ctx.cli.runExpectSuccess([
+        'create',
+        `[CLI-TEST] Flashcard Note ${ctx.runId}`,
+        '--parent-id',
+        state.integrationParentRemId as string,
+        '--back-text',
+        'This is the back of the flashcard',
+        '--concept',
+        '--tags',
+        state.searchByTagTag as string,
+      ])) as Record<string, unknown>;
+      assertHasField(result, 'remId', 'create flashcard note');
+      state.noteCId = result.remId as string;
+      steps.push({ label: 'Create flashcard note', passed: true, durationMs: Date.now() - start });
+    } catch (e) {
+      steps.push({
+        label: 'Create flashcard note',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
+  // Step 4: Create markdown tree with various flashcard types
+  {
+    const start = Date.now();
+    try {
+      const markdownContent = [
+        `- Flashcard Tree`,
+        `  - Basic Forward >> Answer`,
+        `  - Basic Backward << Answer`,
+        `  - Two-way :: Answer`,
+        `  - Disabled >- Answer`,
+        `  - Cloze with {{hidden}}{({hint text})} text`,
+        `  - Concept :: Definition`,
+        `  - Concept Forward :> Definition`,
+        `  - Concept Backward :< Definition`,
+        `  - Descriptor ;; Detail`,
+        `  - Multi-line >>>`,
+        `    - Card Item 1`,
+        `    - Card Item 2`,
+        `  - List-answer >>1.`,
+        `    - First list item`,
+        `    - Second list item`,
+        `  - Multiple-choice >>A)`,
+        `    - Correct option`,
+        `    - Wrong option`
+      ].join('\n')
+
+      const result = (await withTempContentFile(markdownContent, async (contentPath) => {
+        return (await ctx.cli.runExpectSuccess([
+          'create-md',
+          '--parent-id',
+          state.integrationParentRemId as string,
+          '--content-file',
+          contentPath,
+          '--title',
+          `[CLI-TEST] Flashcard Tree ${ctx.runId}`,
+          '--tags',
+          state.searchByTagTag as string,
+        ])) as Record<string, unknown>;
+      })) as Record<string, unknown>;
+
+      assertHasField(result, 'remIds', 'create markdown tree');
+      assertIsArray(result.remIds, 'markdown tree remIds');
+      state.mdTreeIds = result.remIds as string[];
+      steps.push({ label: 'Create md tree with flashcards', passed: true, durationMs: Date.now() - start });
+    } catch (e) {
+      steps.push({
+        label: 'Create md tree with flashcards',
+        passed: false,
+        durationMs: Date.now() - start,
+        error: (e as Error).message,
+      });
+    }
+  }
+
   // Wait for indexing
   await new Promise((r) => setTimeout(r, INDEXING_DELAY_MS));
 
-  // Step 3: Search for created notes
+  // Step 5: Search for created notes
   {
     const start = Date.now();
     try {
@@ -269,7 +351,7 @@ export async function createSearchWorkflow(
     }
   }
 
-  // Step 4-6: Search with includeContent modes
+  // Step 6-8: Search with includeContent modes
   for (const mode of ['markdown', 'structured', 'none'] as const) {
     const start = Date.now();
     const label = `Search includeContent=${mode} returns expected shape`;
@@ -287,8 +369,8 @@ export async function createSearchWorkflow(
       const results = result.results as Array<Record<string, unknown>>;
       debugResults = results;
       assertTruthy(results.length >= 1, `search ${mode} should find rich note`);
-      assertTruthy(typeof state.noteBId === 'string', 'rich note remId should be recorded');
-      const match = findMatchingSearchResult(results, state.noteBId as string);
+      assertTruthy(typeof state.mdTreeIds?.[0] === 'string', 'md tree root remId should be recorded');
+      const match = findMatchingSearchResult(results, state.mdTreeIds?.[0] as string);
       assertSearchContentModeShape(match, mode);
       assertParentContext(match, state, `search ${mode} parent context`);
       steps.push({
@@ -303,7 +385,7 @@ export async function createSearchWorkflow(
         durationMs: Date.now() - start,
         error:
           `${(e as Error).message} | query=${JSON.stringify(query)} expectedRemId=${JSON.stringify(
-            state.noteBId ?? null
+            state.mdTreeIds?.[0] ?? null
           )}` +
           (debugResults
             ? ` resultCount=${debugResults.length} topResults=${JSON.stringify(
@@ -314,7 +396,7 @@ export async function createSearchWorkflow(
     }
   }
 
-  // Step 7-9: Search by tag with includeContent modes
+  // Step 9-11: Search by tag with includeContent modes
   let expectedTagTarget: ExpectedTagTarget | undefined;
   {
     const start = Date.now();
