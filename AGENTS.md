@@ -26,7 +26,7 @@ When bridge contracts change, validate all three repos.
 ### External CLI Command Surface
 
 - Daemon lifecycle: `daemon start`, `daemon stop`, `daemon status`
-- Bridge commands: `create`, `create-md`, `search`, `search-tag`, `read`, `update`, `journal`, `status`
+- Bridge commands: `create`, `search`, `search-tag`, `read`, `update`, `journal`, `status`
 
 ### Bridge Mapping and Compatibility
 

@@ -6,11 +6,17 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- Enhanced `create` command with flashcard support (`-b/--back-text`, `--concept`, `--descriptor`).
-- Added `create-md` command to allow creating native hierarchical Rem structures (including flashcards via `::`) from indented markdown strings.
+- Enhanced `create` command, with unified signature `create [title] [content]`, allowing input via:
+  - `[title]` positional argument or `--title` option for
+  - `[content]` positional argument or `--content -c` option supporting direct hierarchical tree creation and flashcards via RemNote native markdown syntax.
 
 ### Changed
+- Updated `remnote_create_note` input schema:
+  - Made `title` optional (at least one of `title` or `content` must be provided).
+- Updated `remnote_create_note` output schema to return plural `remIds` and `titles` arrays.
+### Changed
 
+- Updated `create` response format from single `remId`/`title` to `remIds` and `titles` arrays to support multi-Rem creation.
 - Renamed the local OpenClaw skill package directory to `skills/` and updated live repository references, including
   the ClawHub upload script path.
 - Extended `./code-quality.sh` to validate and package every committed skill under `skills/` using the local
