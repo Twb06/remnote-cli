@@ -5,18 +5,17 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-
-- Enhanced `create` command, with unified signature `create [title] [content]`, allowing input via:
-  - `[title]` positional argument or `--title` option for
-  - `[content]` positional argument or `--content -c` option supporting direct hierarchical tree creation and flashcards via RemNote native markdown syntax.
+- Added support for hierarchical markdown trees in `create` (`--content`, `--content-file`), `update` (`--append`, `--replace`) and `journal` (`--content`).
+  - Flashcards could be created using RemNote markdown syntax (e.g., `::`, `;;`, `>>`) within the `content`.
+  - Shell-safe signature in: `create [title] [options]`. Content must be provided via `--content` / `-c` or `--content-file`.
 
 ### Changed
+- Updated mutating bridge actions (`create_note`, `update_note`, `append_journal`) and CLI commands to return plural `remIds` and `titles` arrays for consistent multi-Rem support.
 - Updated `remnote_create_note` input schema:
-  - Made `title` optional (at least one of `title` or `content` must be provided).
-- Updated `remnote_create_note` output schema to return plural `remIds` and `titles` arrays.
-### Changed
+  - Made `title` optional
+  - At least one of `title` or `content` must be provided.
+- Refined tag application rules with hierarchical markdown: tags are only applied to the created root or top-level Rems, not to all nested descendants.
 
-- Updated `create` response format from single `remId`/`title` to `remIds` and `titles` arrays to support multi-Rem creation.
 - Renamed the local OpenClaw skill package directory to `skills/` and updated live repository references, including
   the ClawHub upload script path.
 - Extended `./code-quality.sh` to validate and package every committed skill under `skills/` using the local

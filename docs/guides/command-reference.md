@@ -125,7 +125,7 @@ remnote-cli --text daemon status
 Create a new RemNote note or a hierarchical tree.
 
 ```bash
-remnote-cli create [title] [content] [options]
+remnote-cli create [title] [options]
 ```
 
 | Option | Default | Description |
@@ -138,31 +138,34 @@ remnote-cli create [title] [content] [options]
 
 Behavior rules:
 
-- `title` and `content` (either as positional arg or via `--title`, `--content/--content-file`) are both optional, but **at least one must be provided**.
-- If both positional `content` and `--content/--content-file` are provided, the positional argument takes precedence.
+- `title` and `content` are both optional, but **at least one must be provided**.
+- Title input support positional `[title]` (backward-compatible) and `--title <text>`.
+- Content input from `-c`/`--content`/`--content-file` supports RemNote's native markdown syntax for creating nested hierarchies and flashcards inline.
 - `--content` and `--content-file` are mutually exclusive.
-- Content supports RemNote's native markdown syntax for creating nested hierarchies and flashcards inline.
 - Content loaded from file/stdin is passed verbatim (no templating/interpolation).
 - Write content from `--content-file`/`--append-file`/`--replace-file`/stdin is capped at 100 KB.
+- If `parent-id` is not provided, the note will be created under the default root rem in the setting.
 - Tags are applied only to the top-level Rems created.
 
 Examples:
 
 ```bash
-# Simple note with title only, either by positional argument or --title option
+# Simple note with title only, either by positional argument or --title option, create under default root rem
 remnote-cli create "Meeting Notes"
 remnote-cli create --title "Meeting Notes"
 
-# Note with title and content, either by positional arguments or --title and --content options
-remnote-cli create "Project Plan" "Phase 1" --tags planning work
+# Create a new note under a specific parent rem id
+remnote-cli create --title "Meeting Notes" --parent-id <parent-rem-id>
+
+# Create a new note with title and content
 remnote-cli create --title "Project Plan" --content "Phase 1" --tags planning work
 
-# Content only (as positional argument or --content option)
-remnote-cli create "" "- Item 1\n  - Item 2"
-remnote-cli create --content "- Item 1\n  - Item 2"
+# Create a new note with markdown content directly under parent rem id
+# Note: if the content is in markdown format, --content/--content-file must be used to avoid misinterpretation of the content as command options
+remnote-cli create --content "- Item 1\n  - Item 2" --parent-id <parent-rem-id>
 
 # Flashcards
-remnote-cli create "Photosynthesis" "Front :: Back"
+remnote-cli create --title "Photosynthesis" --content "Front :: Back"
 
 # Hierarchical tree from file or from parsed markdown
 remnote-cli create --title "Biology Terms" --content-file /tmp/biology.md
@@ -271,6 +274,7 @@ Behavior rules:
 
 - Options can be combined in one call (title/content/tag updates in one request).
 - At least one update field should be provided.
+- Input from `--append`/`--append-file`/`--replace`/`--replace-file` supports RemNote's native markdown syntax for creating nested hierarchies and flashcards inline.
 - `--append` and `--append-file` are mutually exclusive.
 - `--replace` and `--replace-file` are mutually exclusive.
 - Append and replace are mutually exclusive in a single command:
@@ -313,6 +317,7 @@ Behavior rules:
   - positional `[content]` (backward-compatible)
   - `--content <text>`
   - `--content-file <path|->`
+- Content input from `--content`/`--content-file` supports RemNote's native markdown syntax for creating nested hierarchies and flashcards inline.
 
 Examples:
 
