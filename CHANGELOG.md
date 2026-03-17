@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - Added support for hierarchical markdown trees in `create` (`--content`, `--content-file`), `update` (`--append`, `--replace`) and `journal` (`--content`).
-  - Flashcards could be created using RemNote markdown syntax (e.g., `::`, `;;`, `>>`) within the `content`.
+  - Flashcards can be created using RemNote markdown syntax (e.g., `::`, `;;`, `>>`) within the `content`.
   - Shell-safe signature in: `create [title] [options]`. Content must be provided via `--content` / `-c` or `--content-file`.
 
 ### Changed
