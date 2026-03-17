@@ -32,6 +32,10 @@ All notable changes to this project will be documented in this file.
 - Added manual `Reconnect` guidance for cases where the bridge exhausted its startup retries before the daemon was
   ready.
 
+### Attribution
+
+- Most of the cross-repo `create_note` / markdown-tree work in this release was implemented by @Twb06.
+
 ## [0.8.0] - 2026-03-04
 
 ### Added
