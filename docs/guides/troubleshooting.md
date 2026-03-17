@@ -20,11 +20,11 @@ remnote-cli status --control-port 4100
 **Checklist:**
 1. Is RemNote running?
 2. Is the RemNote Automation Bridge plugin installed and enabled in RemNote?
-3. Is the Automation Bridge panel open in RemNote's right sidebar? On current bridge builds, opening that panel
-   mounts the bridge runtime and starts the WebSocket connection attempts.
-4. Does the panel show **Connected**?
+3. Give the bridge time to connect automatically in the background after RemNote starts.
+4. If you open the Automation Bridge panel in the right sidebar, does it show **Connected**?
 5. Is the daemon running on port 3002? (The bridge connects to this port)
-6. If RemNote was already open before the daemon started, click **Reconnect** in the panel after the daemon is ready.
+6. If RemNote was already open before the daemon started, wait for background retry or click **Reconnect** in the
+   panel if you want an immediate retry.
 7. Check daemon logs: `remnote-cli daemon start --foreground --log-level debug`
 
 ## Version Mismatch After Upgrade

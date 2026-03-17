@@ -27,10 +27,10 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
-- Clarified in `README.md` and troubleshooting docs that the RemNote Automation Bridge sidebar panel must be opened so
-  the bridge runtime mounts and connects to the CLI daemon.
-- Added manual `Reconnect` guidance for cases where the bridge exhausted its startup retries before the daemon was
-  ready.
+- Updated `README.md` and troubleshooting docs to reflect automatic bridge startup on plugin activation; the sidebar
+  panel is now optional for status and manual reconnect.
+- Clarified that the bridge should reconnect in the background after late daemon startup, with manual `Reconnect`
+  remaining available as a faster fallback.
 
 ### Attribution
 

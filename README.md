@@ -33,8 +33,8 @@ CLI Commands (short-lived)
 Two components: the RemNote Automation Bridge plugin connects to the CLI daemon's WebSocket server. CLI commands talk
 to the daemon over a local HTTP control API.
 
-On current bridge builds, the plugin starts its connection attempts when the Automation Bridge sidebar panel is opened.
-If that panel was never opened, the CLI daemon can be running correctly while `status` still shows `connected: false`.
+On current bridge builds, the plugin starts its connection attempts automatically on plugin activation. The Automation
+Bridge sidebar panel is optional for status, logs, and manual reconnect.
 
 ## Quick Start
 
@@ -46,9 +46,10 @@ npm install -g remnote-cli
 # Start the daemon
 remnote-cli daemon start
 
-# Open RemNote, open the Automation Bridge sidebar panel, and wait for Connected
+# Open RemNote and wait for the bridge to connect automatically
+# Optional: open the Automation Bridge sidebar panel to verify status
 
-# Check connection (requires the bridge panel to be open and connected)
+# Check connection
 remnote-cli status --text
 
 # Create a note
@@ -129,8 +130,9 @@ remnote-cli daemon stop
 Another process is using port 3002 or 3100. Use `--ws-port` or `--control-port` to pick different ports.
 
 **"Bridge not connected" after daemon start:**
-Open RemNote, open the Automation Bridge sidebar panel, and make sure it shows **Connected**. If RemNote was already
-open before the daemon started, click **Reconnect** in the panel after the daemon is listening.
+Open RemNote and give the bridge time to connect automatically. If you want to inspect status, open the Automation
+Bridge sidebar panel. If RemNote was already open before the daemon started, the bridge should still reconnect in the
+background; use **Reconnect** in the panel only if you want an immediate retry.
 
 **Stale PID file:**
 If the daemon crashed, `daemon start` will detect the stale PID file and clean it up automatically.
