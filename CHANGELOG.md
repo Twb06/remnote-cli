@@ -25,6 +25,13 @@ All notable changes to this project will be documented in this file.
 - Improved RemNote skill marketplace discoverability by expanding note/knowledge-base keywords in
   `skills/remnote/SKILL.md` and publishing it with the display name `RemNote Notes`.
 
+### Documentation
+
+- Clarified in `README.md` and troubleshooting docs that the RemNote Automation Bridge sidebar panel must be opened so
+  the bridge runtime mounts and connects to the CLI daemon.
+- Added manual `Reconnect` guidance for cases where the bridge exhausted its startup retries before the daemon was
+  ready.
+
 ## [0.8.0] - 2026-03-04
 
 ### Added
