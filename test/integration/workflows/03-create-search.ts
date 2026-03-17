@@ -256,7 +256,11 @@ export async function createSearchWorkflow(
       assertIsArray(result.remIds, 'remIds should be an array');
       state.noteCId = (result.remIds as string[])[0];
 
-      steps.push({ label: 'Create flashcard with positional arguments checks', passed: true, durationMs: Date.now() - start });
+      steps.push({
+        label: 'Create flashcard with positional arguments checks',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
     } catch (e) {
       steps.push({
         label: 'Create flashcard with positional arguments checks',
@@ -290,8 +294,8 @@ export async function createSearchWorkflow(
         `    - Second list item`,
         `  - Multiple-choice >>A)`,
         `    - Correct option`,
-        `    - Wrong option`
-      ].join('\n')
+        `    - Wrong option`,
+      ].join('\n');
 
       const result = (await withTempContentFile(markdownContent, async (contentPath) => {
         return (await ctx.cli.runExpectSuccess([
@@ -310,7 +314,11 @@ export async function createSearchWorkflow(
       assertHasField(result, 'remIds', 'create markdown tree');
       assertIsArray(result.remIds, 'markdown tree remIds');
       state.mdTreeIds = result.remIds as string[];
-      steps.push({ label: 'Create md tree with flashcards', passed: true, durationMs: Date.now() - start });
+      steps.push({
+        label: 'Create md tree with flashcards',
+        passed: true,
+        durationMs: Date.now() - start,
+      });
     } catch (e) {
       steps.push({
         label: 'Create md tree with flashcards',
@@ -328,10 +336,10 @@ export async function createSearchWorkflow(
   {
     const start = Date.now();
     try {
-      const result = (await ctx.cli.runExpectSuccess([
-        'search',
-        `${ctx.runId}`,
-      ])) as Record<string, unknown>;
+      const result = (await ctx.cli.runExpectSuccess(['search', `${ctx.runId}`])) as Record<
+        string,
+        unknown
+      >;
       assertHasField(result, 'results', 'search results');
       assertIsArray(result.results, 'search results');
       const results = result.results as Array<Record<string, unknown>>;
@@ -372,7 +380,10 @@ export async function createSearchWorkflow(
       const results = result.results as Array<Record<string, unknown>>;
       debugResults = results;
       assertTruthy(results.length >= 1, `search ${mode} should find rich note`);
-      assertTruthy(typeof state.mdTreeIds?.[0] === 'string', 'md tree root remId should be recorded');
+      assertTruthy(
+        typeof state.mdTreeIds?.[0] === 'string',
+        'md tree root remId should be recorded'
+      );
       const match = findMatchingSearchResult(results, state.mdTreeIds?.[0] as string);
       assertSearchContentModeShape(match, mode);
       assertParentContext(match, state, `search ${mode} parent context`);

@@ -61,13 +61,16 @@ describe('arg-utils', () => {
     it('does not throw for valid values (Markdown, numbers)', () => {
       const cmd = new Command();
       cmd.option('--content <text>', 'content');
-      
+
       expect(() =>
-        checkPayloadForFlags({ 
-          content: '- list item', 
-          count: '-5', 
-          text: 'Normal text' 
-        }, cmd)
+        checkPayloadForFlags(
+          {
+            content: '- list item',
+            count: '-5',
+            text: 'Normal text',
+          },
+          cmd
+        )
       ).not.toThrow();
     });
 

@@ -87,7 +87,7 @@ with "quotes" and \`ticks\``;
   });
 
   it('un-escapes literal \\n in inline content', async () => {
-    const inlineText = "- line 1\n- line 2";
+    const inlineText = '- line 1\n- line 2';
     const resolved = await resolveOptionalInlineOrFileContent({
       inlineText,
       filePath: undefined,

@@ -42,7 +42,9 @@ export function registerJournalCommand(program: Command): void {
             const titles = r.titles || [];
             if (ids.length === 0) return 'No journal entry Rems created.';
             return titles
-              .map((t, i) => `Journal entry added: ${t || '(untitled)'} (ID: ${ids[i] || 'unknown'})`)
+              .map(
+                (t, i) => `Journal entry added: ${t || '(untitled)'} (ID: ${ids[i] || 'unknown'})`
+              )
               .join('\n');
           })
         );

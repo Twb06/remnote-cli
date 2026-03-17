@@ -93,11 +93,10 @@ export async function journalWorkflow(
       const result = (await withTempContentFile(
         `[CLI-TEST] Markdown entry ${ctx.runId}\n\n## Section\n- Item 1\n- Item 2`,
         async (contentPath) =>
-          (await ctx.cli.runExpectSuccess([
-            'journal',
-            '--content-file',
-            contentPath,
-          ])) as Record<string, unknown>
+          (await ctx.cli.runExpectSuccess(['journal', '--content-file', contentPath])) as Record<
+            string,
+            unknown
+          >
       )) as Record<string, unknown>;
       assertHasField(result, 'remIds', 'journal append with markdown');
       state.journalEntryCId = (result.remIds as string[])[0];

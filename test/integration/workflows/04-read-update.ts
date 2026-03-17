@@ -376,7 +376,7 @@ export async function readUpdateWorkflow(
         label: 'Update note A (empty replace clears children)',
         passed: true,
         durationMs: Date.now() - start,
-        });
+      });
     } catch (e) {
       steps.push({
         label: 'Update note A (empty replace clears children)',
@@ -461,7 +461,10 @@ export async function readUpdateWorkflow(
           ])) as Record<string, unknown>
       )) as Record<string, unknown>;
       assertHasField(result, 'remIds', 'update note A replace markdown tree');
-      assertTruthy((result.remIds as string[]).length >= 3, 'should create multiple rems for replaced tree');
+      assertTruthy(
+        (result.remIds as string[]).length >= 3,
+        'should create multiple rems for replaced tree'
+      );
 
       const reread = (await ctx.cli.runExpectSuccess([
         'read',
@@ -469,7 +472,11 @@ export async function readUpdateWorkflow(
         '--include-content',
         'markdown',
       ])) as Record<string, unknown>;
-      assertContains(reread.content as string, 'New Branch', 'should contain replaced tree content');
+      assertContains(
+        reread.content as string,
+        'New Branch',
+        'should contain replaced tree content'
+      );
       assertContains(reread.content as string, 'New Leaf', 'should contain replaced tree content');
 
       steps.push({

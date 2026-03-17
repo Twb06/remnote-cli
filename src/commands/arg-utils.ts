@@ -1,4 +1,4 @@
-import { InvalidArgumentError, type Command} from 'commander';
+import { InvalidArgumentError, type Command } from 'commander';
 
 /**
  * A memory-safe cache that stores the flattened list of registered flags for each Command.
@@ -24,8 +24,8 @@ const getAllRegisteredFlags = (cmd: Command): string[] => {
 
   while (current) {
     if (current.options) {
-      const currentFlags = current.options.flatMap(opt =>
-        [opt.short, opt.long].filter(Boolean) as string[]
+      const currentFlags = current.options.flatMap(
+        (opt) => [opt.short, opt.long].filter(Boolean) as string[]
       );
       flags = [...flags, ...currentFlags];
     }
@@ -36,7 +36,6 @@ const getAllRegisteredFlags = (cmd: Command): string[] => {
   flagCache.set(cmd, flags);
   return flags;
 };
-
 
 /**
  * Determines if a given string value looks like a CLI flag instead of a standard argument.
@@ -68,7 +67,10 @@ export function isFlag(value: string | undefined, cmd?: Command): boolean {
  * @param cmd - (Optional) The Command instance for strict flag matching.
  * @throws {Error} If any value is identified as a shifted flag.
  */
-export function checkPayloadForFlags(fields: Record<string, string | undefined>, cmd?: Command): void {
+export function checkPayloadForFlags(
+  fields: Record<string, string | undefined>,
+  cmd?: Command
+): void {
   for (const [name, value] of Object.entries(fields)) {
     if (isFlag(value, cmd)) {
       throw new Error(

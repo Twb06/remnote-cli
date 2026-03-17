@@ -13,8 +13,16 @@ export function registerUpdateCommand(program: Command): void {
     .description('Update an existing note')
     .option('--title <text>', 'New title', validate)
     .option('--append <text>', 'Append content', validate)
-    .option('--append-file <path>', 'Read appended content from UTF-8 file ("-" for stdin)', validate)
-    .option('--replace <text>', 'Replace direct child content (empty string clears all children)', validate)
+    .option(
+      '--append-file <path>',
+      'Read appended content from UTF-8 file ("-" for stdin)',
+      validate
+    )
+    .option(
+      '--replace <text>',
+      'Replace direct child content (empty string clears all children)',
+      validate
+    )
     .option(
       '--replace-file <path>',
       'Read replacement content from UTF-8 file ("-" for stdin; empty file clears all children)',
