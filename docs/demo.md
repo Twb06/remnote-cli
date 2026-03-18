@@ -1,6 +1,6 @@
 # Demo
 
-Terminal demonstration of `remnote-cli` against a live RemNote + RemNote Automation Bridge plugin setup.
+Demonstration of `remnote-cli` against a live RemNote + RemNote Automation Bridge plugin setup.
 
 ## Example of OpenClaw Chat Workflow with `remnote-cli`
 
