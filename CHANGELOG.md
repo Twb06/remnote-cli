@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Documentation
+
+- Refreshed `skills/remnote/SKILL.md` to use the current bridge connection lifecycle for troubleshooting, including
+  automatic background reconnect behavior, sidebar wake-up guidance, and additional agent-useful command details such
+  as `--control-port`, tag updates, journal timestamp control, and argument-shifting safeguards.
+- Updated `docs/guides/troubleshooting.md` to match the current bridge lifecycle, clarifying automatic reconnect,
+  optional sidebar usage, panel status meanings, wake-up triggers, and post-upgrade daemon restart steps.
+
 ## [0.10.0] - 2026-03-18
 
 ### Documentation

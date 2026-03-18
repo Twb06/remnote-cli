@@ -54,7 +54,8 @@ skill customization when needed.
    - Preferred install: `npm install -g remnote-cli`
 4. RemNote is open in browser/app (`https://www.remnote.com/`).
 5. `remnote-cli` daemon is running (`remnote-cli daemon start`).
-6. The plugin panel is open in RemNote right sidebar and shows connected status.
+6. The right-sidebar `MCP` panel is available for status inspection and manual reconnect when needed, but it is not
+   required to already be open before commands work.
 
 If any precondition is missing, stop and fix setup first.
 
@@ -90,12 +91,14 @@ If any precondition is missing, stop and fix setup first.
 1. Check daemon and bridge connectivity:
    - `remnote-cli daemon status --text`
    - `remnote-cli status --text`
-2. Confirm plugin panel is open in right sidebar and connected.
-3. Read versions from `remnote-cli status --text`:
+2. Read versions from `remnote-cli status --text`:
    - active plugin version
    - CLI version
    - `version_warning` (if present)
    - write-policy flags: `acceptWriteOperations`, `acceptReplaceOperation`
+3. RemNote-open-first / daemon-starts-later is supported:
+   - the bridge should retry in the background
+   - the sidebar panel is optional and mainly useful for monitoring, manual reconnect, and wake-up triggers
 4. Enforce version rule: bridge plugin and `remnote-cli` must be the same `0.x` minor line (prefer exact match).
 5. If mismatch:
    - Install matching CLI version:
@@ -115,6 +118,7 @@ If any precondition is missing, stop and fix setup first.
 - `remnote-cli daemon start`
 - `remnote-cli daemon status --text`
 - `remnote-cli status --text`
+- `remnote-cli --control-port 3110 status --text` for non-default daemon control ports
 
 ### Read-Only Operations (default)
 
@@ -127,8 +131,11 @@ If any precondition is missing, stop and fix setup first.
 
 - Use JSON output (default) for navigation, multi-step retrieval, and any flow that needs IDs for follow-up reads.
 - Use `--text` only for plain human summarization of exactly one note when no further navigation is needed.
+- Exit code `2` means the daemon is unreachable or not running.
 - For structure traversal, start with shallow reads and high child limit:
   - `remnote-cli read <rem-id> --depth 1 --child-limit 500`
+- Increase `--depth`, `--child-limit`, or `--max-content-length` only when the user actually needs more hierarchy or
+  rendered content.
 
 ### `--include-content` modes
 
@@ -143,23 +150,60 @@ If any precondition is missing, stop and fix setup first.
 ### Mutating Operations (only after `confirm write`)
 
 - Create (preferred): `remnote-cli create "Title" --content-file /tmp/body.md --text`
+- Create under a parent or apply tags:
+  - `remnote-cli create "Title" --parent-id <rem-id> --tags project active --text`
 - Update (preferred): `remnote-cli update <rem-id> --title "New Title" --append-file /tmp/append.md --text`
+- Update tags:
+  - `remnote-cli update <rem-id> --add-tags active --remove-tags draft --text`
 - Update replace (destructive, preferred only with explicit user intent):
   - `remnote-cli update <rem-id> --replace-file /tmp/replacement.md --text`
   - `remnote-cli update <rem-id> --replace "" --text` (clear all direct children)
 - Journal: `remnote-cli journal "Finished task" --text`
 - Journal (from file): `remnote-cli journal --content-file /tmp/entry.md --text`
+- Journal without timestamp:
+  - `remnote-cli journal --content-file /tmp/entry.md --no-timestamp --text`
 - Fallbacks (discouraged): inline flags for short single-line text only.
 - Safety:
   - Never combine append and replace flags in one command.
   - Run replace only when `acceptWriteOperations=true` and `acceptReplaceOperation=true` from `status`.
   - Treat replace as destructive and require the user to clearly request replace semantics.
+  - Quote text values with spaces or special characters, and use explicit empty-value syntax like `--title=""` to avoid
+    argument shifting.
 
 ## Failure Handling
 
-- Daemon unreachable (exit code `2`): start daemon and retry.
-- Bridge not connected: open RemNote, open right sidebar plugin panel, verify connected state, retry `status`.
-- Version mismatch warning: align `remnote-cli` version to plugin `0.x` minor line, then restart daemon.
+When a bridge-backed operation fails (`search`, `search-tag`, `read`, `create`, `update`, `journal`, `status`), run
+this sequence in order:
+
+1. Check bridge status first:
+   - `remnote-cli status --text`
+2. If `status --text` fails with exit code `2` or says the daemon is unreachable:
+   - run `remnote-cli daemon status --text`
+   - if the daemon is not running, run `remnote-cli daemon start`
+   - re-run `remnote-cli status --text`
+3. If `status --text` shows `version_warning`:
+   - align the CLI version to the plugin `0.x` minor line
+   - restart with separate commands because `daemon restart` does not exist:
+     - `remnote-cli daemon stop`
+     - `remnote-cli daemon start`
+   - re-run `remnote-cli status --text`
+4. If the bridge is disconnected:
+   - use the browser tool to ensure `https://www.remnote.com/` is open and reachable
+   - re-run `remnote-cli status --text`
+   - if needed, wait and retry for up to 30 seconds because the bridge may still be in burst retry or standby retry
+5. If it is still disconnected:
+   - use the browser tool to open the right sidebar and click the `MCP` icon if present
+   - opening the panel is itself a wake-up trigger and may restart faster retries
+6. Inspect the plugin panel state:
+   - `Connected` means retry the CLI command
+   - `Connecting` means a connection attempt is in progress; wait briefly, then re-run `remnote-cli status --text`
+   - `Retrying` means the burst retry window is active; wait briefly or use `Reconnect Now`
+   - `Waiting for server` means standby mode is active; use `Reconnect Now` or another wake-up trigger
+7. If the `MCP` icon is missing, report that the plugin UI is not available in RemNote.
+8. If the panel is visible but still not connected:
+   - capture the visible panel state, disconnect reason, and whether `Reconnect Now` helped
+   - report that context to the user before stopping
+9. Only after the sequence above fails should you report the command failure as unresolved.
 
 ## Operational Notes
 

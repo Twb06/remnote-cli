@@ -20,12 +20,27 @@ remnote-cli status --control-port 4100
 **Checklist:**
 1. Is RemNote running?
 2. Is the RemNote Automation Bridge plugin installed and enabled in RemNote?
-3. Give the bridge time to connect automatically in the background after RemNote starts.
-4. If you open the Automation Bridge panel in the right sidebar, does it show **Connected**?
-5. Is the daemon running on port 3002? (The bridge connects to this port)
-6. If RemNote was already open before the daemon started, wait for background retry or click **Reconnect** in the
-   panel if you want an immediate retry.
-7. Check daemon logs: `remnote-cli daemon start --foreground --log-level debug`
+3. Is the daemon running on port 3002? (The bridge connects to this port.)
+   - Check with `remnote-cli daemon status --text`
+   - If needed, start it with `remnote-cli daemon start`
+4. Re-check bridge status with `remnote-cli status --text`.
+5. Give the bridge up to 30 seconds to reconnect automatically in the background after RemNote starts or after the
+   daemon becomes available.
+6. If RemNote was already open before the daemon started, background reconnect is still supported.
+7. Open the Automation Bridge panel in the right sidebar if you want to inspect status or wake the bridge sooner.
+   The panel is optional for normal operation; it is a monitoring and manual-control surface, not the thing that
+   creates the connection.
+8. If the panel is open:
+   - **Connected** means the bridge is live.
+   - **Connecting** means a connection attempt is in progress.
+   - **Retrying** means the fast retry window is active.
+   - **Waiting for server** means standby retry is active.
+9. If the panel shows **Retrying** or **Waiting for server**, use **Reconnect Now** or interact inside RemNote
+   (for example, switch notes or panes) to trigger a faster retry instead of waiting for the next scheduled attempt.
+10. If the `MCP` icon is missing from the right sidebar toolbar, the plugin UI is not available; verify the plugin is
+    installed and enabled.
+11. Check daemon logs if you still need deeper debugging:
+    `remnote-cli daemon start --foreground --log-level debug`
 
 For detailed bridge retry phases and wake-up behavior, see the canonical bridge doc:
 [Connection Lifecycle Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/connection-lifecycle.md).
@@ -38,7 +53,11 @@ For detailed bridge retry phases and wake-up behavior, see the canonical bridge 
 1. Check bridge plugin version in RemNote (or from `status` output if it reports `pluginVersion`).
 2. Check CLI version: `remnote-cli --version`.
 3. Install a compatible CLI version (prefer same minor line for `0.x`).
-4. See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
+4. Restart the daemon after upgrading either side:
+   - `remnote-cli daemon stop`
+   - `remnote-cli daemon start`
+   - `remnote-cli status --text`
+5. See the [Bridge / Consumer Version Compatibility Guide](https://github.com/robert7/remnote-mcp-bridge/blob/main/docs/guides/bridge-consumer-version-compatibility.md).
 
 ## Daemon Won't Start
 
