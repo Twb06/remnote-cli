@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- New `read-table` command for reading Advanced Table data (columns, rows, cell values) via the bridge
+- Options: `--limit`, `--offset`, `--properties` (comma-separated column filter)
+- Human-readable text output with ASCII table formatting
+
 ### Documentation
 
 - Refreshed `skills/remnote/SKILL.md` to use the current bridge connection lifecycle for troubleshooting, including
