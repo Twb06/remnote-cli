@@ -20,6 +20,7 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - Added a README note pointing contributors to the shared bridge pull request guide for cross-repo parity and linked PR expectations.
+- Added a pull request template that links contributors to the shared bridge PR guide.
 
 - Refreshed `skills/remnote/SKILL.md` to use the current bridge connection lifecycle for troubleshooting, including
   automatic background reconnect behavior, sidebar wake-up guidance, and additional agent-useful command details such
