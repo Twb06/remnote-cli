@@ -23,6 +23,25 @@ function waitForMessage(ws: WebSocket): Promise<string> {
   });
 }
 
+function waitForMatchingMessage(
+  ws: WebSocket,
+  predicate: (message: Record<string, unknown>) => boolean
+): Promise<Record<string, unknown>> {
+  return new Promise((resolve) => {
+    const listener = (data: WebSocket.RawData) => {
+      const message = JSON.parse(data.toString()) as Record<string, unknown>;
+      if (!predicate(message)) {
+        return;
+      }
+
+      ws.off('message', listener);
+      resolve(message);
+    };
+
+    ws.on('message', listener);
+  });
+}
+
 describe('WebSocketServer - Hello Message', () => {
   let server: WebSocketServer;
   let client: WebSocket | null = null;
@@ -73,6 +92,23 @@ describe('WebSocketServer - Hello Message', () => {
 
   it('exposes CLI version', () => {
     expect(server.getCliVersion()).toBe('0.5.0');
+  });
+
+  it('announces CLI identity on connect', async () => {
+    await server.start();
+    const messagePromise = new Promise<Record<string, unknown>>((resolve, reject) => {
+      const nextClient = new WebSocket(`ws://${TEST_HOST}:${server.getPort()}`);
+      nextClient.once('message', (data) => resolve(JSON.parse(data.toString())));
+      nextClient.once('error', reject);
+      client = nextClient;
+    });
+
+    const message = await messagePromise;
+    expect(message).toEqual({
+      type: 'companion_info',
+      kind: 'cli',
+      version: '0.5.0',
+    });
   });
 });
 
@@ -148,11 +184,12 @@ describe('WebSocketServer', () => {
     // Wait a tick for connection to register
     await new Promise((r) => setTimeout(r, 50));
 
-    const msgPromise = waitForMessage(client);
+    const msgPromise = waitForMatchingMessage(client, (message) => {
+      return typeof message.id === 'string' && typeof message.action === 'string';
+    });
     const resultPromise = server.sendRequest('test_action', { key: 'value' });
 
-    const rawMsg = await msgPromise;
-    const msg = JSON.parse(rawMsg);
+    const msg = await msgPromise;
     expect(msg.action).toBe('test_action');
     expect(msg.payload).toEqual({ key: 'value' });
     expect(msg.id).toBeDefined();
@@ -190,11 +227,10 @@ describe('WebSocketServer', () => {
     client = await connectClient(server.getPort());
     await new Promise((r) => setTimeout(r, 50));
 
-    const pongPromise = waitForMessage(client);
+    const pongPromise = waitForMatchingMessage(client, (message) => message.type === 'pong');
     client.send(JSON.stringify({ type: 'ping' }));
 
-    const rawPong = await pongPromise;
-    const pong = JSON.parse(rawPong);
+    const pong = await pongPromise;
     expect(pong.type).toBe('pong');
   });
 
@@ -216,11 +252,12 @@ describe('WebSocketServer', () => {
     client = await connectClient(server.getPort());
     await new Promise((r) => setTimeout(r, 50));
 
-    const msgPromise = waitForMessage(client);
+    const msgPromise = waitForMatchingMessage(client, (message) => {
+      return typeof message.id === 'string' && typeof message.action === 'string';
+    });
     const resultPromise = server.sendRequest('fail_action', {});
 
-    const rawMsg = await msgPromise;
-    const msg = JSON.parse(rawMsg);
+    const msg = await msgPromise;
 
     client.send(JSON.stringify({ id: msg.id, error: 'Something went wrong' }));
 

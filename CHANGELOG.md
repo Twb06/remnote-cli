@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
   pagination, column filtering, and text output.
 - Added `./run-agent-integration-test.sh` for explicit agent-assisted live integration runs that wait for a connected
   bridge before launching the suite.
+- Added a `companion_info` WebSocket handshake so the bridge sidebar can identify a connected CLI instance and show
+  its version.
 
 ### Changed
 
