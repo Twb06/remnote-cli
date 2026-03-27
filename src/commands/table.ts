@@ -5,22 +5,28 @@ import { EXIT } from '../config.js';
 
 export function registerReadTableCommand(program: Command): void {
   program
-    .command('read-table <table-name-or-id>')
+    .command('read-table')
     .description('Read an Advanced Table (columns and row data)')
+    .option('--title <title>', 'Exact Advanced Table title')
+    .option('--rem-id <id>', 'Table Rem ID')
     .option('-l, --limit <n>', 'Maximum rows to return (default: 50)', '50')
     .option('--offset <n>', 'Row offset for pagination (default: 0)', '0')
     .option('-p, --properties <names>', 'Comma-separated property/column names to include')
-    .action(async (tableNameOrId: string, opts) => {
+    .action(async (opts) => {
       const globalOpts = program.opts();
       const format: OutputFormat = globalOpts.text ? 'text' : 'json';
       const client = new DaemonClient(parseInt(globalOpts.controlPort, 10));
 
       try {
         const payload: Record<string, unknown> = {
-          tableNameOrId,
           limit: parseInt(opts.limit, 10),
           offset: parseInt(opts.offset, 10),
         };
+        if ((opts.title ? 1 : 0) + (opts.remId ? 1 : 0) !== 1) {
+          throw new Error('Provide exactly one of --title or --rem-id');
+        }
+        if (opts.title) payload.tableTitle = opts.title as string;
+        if (opts.remId) payload.tableRemId = opts.remId as string;
         if (opts.properties) {
           payload.propertyFilter = (opts.properties as string)
             .split(',')

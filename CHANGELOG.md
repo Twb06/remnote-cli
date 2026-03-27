@@ -20,12 +20,14 @@ All notable changes to this project will be documented in this file.
 - Pinned the shared GitHub Actions CI workflow to `robert7/workflows/.github/workflows/node-ci.yml@v0.2.0`.
 - Fixed flaky WebSocket/daemon tests in CI by switching them to OS-assigned ephemeral ports instead of probing a free
   port and re-binding it later.
+- Changed `read-table` to require exactly one explicit identifier flag: `--title` or `--rem-id`.
 
 ### Fixed
 - Fixed read-table integration config loading to use only
   `~/.remnote-mcp-bridge/remnote-mcp-bridge.json`.
 - Tightened read-table integration coverage to validate filtering, deterministic error handling, and Rem-ID
   lookup.
+- Improved read-table integration diagnostics so Rem-ID validation reports independently from name-lookup failures.
 
 ### Documentation
 

@@ -38,6 +38,7 @@ the RemNote Automation Bridge plugin connected to the daemon.
 CLI environments (especially Windows shells) can sometimes "swallow" empty strings or misinterpret arguments if quoting is missing. This can lead to **argument shifting**, where a flag (like `--content`) is incorrectly interpreted as the *value* for a preceding option (like `--title`).
 
 To prevent this:
+
 1. **Always quote** text values that contain spaces or special characters.
 2. **Use explicit equality** for potentially empty values: `--title=""`.
 3. `remnote-cli` includes **shifting detection**: if an option value matches a registered global or local flag, the command will fail early with an error message to prevent accidental mis-execution.
@@ -263,21 +264,23 @@ remnote-cli read abc123def --include-content structured --depth 2 --child-limit 
 
 ## read-table
 
-Read one Advanced Table by table name or Rem ID.
+Read one Advanced Table by exact title or Rem ID.
 
 ```bash
-remnote-cli read-table <table-name-or-id> [options]
+remnote-cli read-table (--title <title> | --rem-id <id>) [options]
 ```
 
 | Option | Default | Description |
 |--------|---------|-------------|
+| `--title <title>` | none | Exact Advanced Table title |
+| `--rem-id <id>` | none | Table Rem ID |
 | `-l, --limit <n>` | `50` | Maximum rows to return |
 | `--offset <n>` | `0` | Zero-based row offset |
 | `-p, --properties <names>` | none | Comma-separated property names to include |
 
 Behavior rules:
 
-- Accepts either the visible table name or the table Rem ID.
+- Provide exactly one of `--title` or `--rem-id`.
 - JSON output includes `tableId`, `tableName`, `columns`, `rows`, `totalRows`, and `rowsReturned`.
 - In `--text` mode, output prints table identity, column schema, and a simple row grid.
 - `--properties` filters returned columns by property name before rows are formatted.
@@ -286,9 +289,9 @@ Behavior rules:
 Examples:
 
 ```bash
-remnote-cli read-table "Projects"
-remnote-cli read-table abc123def --limit 10
-remnote-cli read-table "Projects" --properties "Status,Owner" --text
+remnote-cli read-table --title "Projects"
+remnote-cli read-table --rem-id abc123def --limit 10
+remnote-cli read-table --title "Projects" --properties "Status,Owner" --text
 ```
 
 ## update

@@ -66,7 +66,7 @@ export async function readTableWorkflow(
   {
     const start = Date.now();
     try {
-      const result = await ctx.cli.run(['read-table', tableName]);
+      const result = await ctx.cli.run(['read-table', '--title', tableName]);
 
       if (result.exitCode !== 0) {
         throw new Error(
@@ -121,7 +121,7 @@ export async function readTableWorkflow(
   if (tableRemId) {
     const start = Date.now();
     try {
-      const result = await ctx.cli.run(['read-table', tableRemId]);
+      const result = await ctx.cli.run(['read-table', '--rem-id', tableRemId]);
 
       if (result.exitCode !== 0) {
         throw new Error(
@@ -130,11 +130,19 @@ export async function readTableWorkflow(
       }
 
       const data = result.json as ReadTableResponse;
-      if (!baseline) {
-        throw new Error('Baseline response missing before Rem-ID validation');
+      if (!('tableId' in data) || !('tableName' in data)) {
+        throw new Error('Response missing table identity fields');
       }
-      assertEqual(data.tableId, baseline.tableId, 'Rem-ID lookup should resolve the same table');
-      assertEqual(data.tableName, baseline.tableName, 'Rem-ID lookup should preserve table name');
+      if (!('columns' in data) || !('rows' in data)) {
+        throw new Error('Response missing table payload fields');
+      }
+      assertEqual(data.tableId, tableRemId, 'Rem-ID lookup should resolve the requested table ID');
+      assertTruthy(data.tableName, 'tableName should not be empty');
+
+      if (baseline) {
+        assertEqual(data.tableId, baseline.tableId, 'Rem-ID lookup should resolve the same table');
+        assertEqual(data.tableName, baseline.tableName, 'Rem-ID lookup should preserve table name');
+      }
 
       steps.push({
         label: 'Read table by remId',
@@ -158,6 +166,7 @@ export async function readTableWorkflow(
       const selectedColumn = baseline.columns[0];
       const result = await ctx.cli.run([
         'read-table',
+        '--title',
         tableName,
         '--properties',
         selectedColumn.name,
@@ -203,7 +212,7 @@ export async function readTableWorkflow(
   {
     const start = Date.now();
     try {
-      const result = await ctx.cli.run(['read-table', tableName, '--limit', '1']);
+      const result = await ctx.cli.run(['read-table', '--title', tableName, '--limit', '1']);
 
       if (result.exitCode !== 0) {
         throw new Error(
@@ -239,7 +248,7 @@ export async function readTableWorkflow(
   {
     const start = Date.now();
     try {
-      const result = await ctx.cli.run(['read-table', tableName, '--offset', '1']);
+      const result = await ctx.cli.run(['read-table', '--title', tableName, '--offset', '1']);
 
       if (result.exitCode !== 0) {
         throw new Error(
@@ -277,7 +286,11 @@ export async function readTableWorkflow(
   {
     const start = Date.now();
     try {
-      const result = await ctx.cli.runExpectError(['read-table', 'Non-Existent-Table-xyz-123']);
+      const result = await ctx.cli.runExpectError([
+        'read-table',
+        '--title',
+        'Non-Existent-Table-xyz-123',
+      ]);
       assertContains(
         `${result.stderr}\n${result.stdout}`,
         'Table not found',

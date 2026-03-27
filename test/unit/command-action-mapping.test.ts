@@ -268,9 +268,9 @@ describe('command bridge action mapping', () => {
   });
 
   it('maps read-table command to read_table', async () => {
-    const executeSpy = await runCommand(['read-table', 'My Table']);
+    const executeSpy = await runCommand(['read-table', '--title', 'My Table']);
     expect(executeSpy).toHaveBeenCalledWith('read_table', {
-      tableNameOrId: 'My Table',
+      tableTitle: 'My Table',
       limit: 50,
       offset: 0,
     });
@@ -278,9 +278,9 @@ describe('command bridge action mapping', () => {
   });
 
   it('maps read-table command with --limit option', async () => {
-    const executeSpy = await runCommand(['read-table', 'My Table', '--limit', '20']);
+    const executeSpy = await runCommand(['read-table', '--title', 'My Table', '--limit', '20']);
     expect(executeSpy).toHaveBeenCalledWith('read_table', {
-      tableNameOrId: 'My Table',
+      tableTitle: 'My Table',
       limit: 20,
       offset: 0,
     });
@@ -288,9 +288,9 @@ describe('command bridge action mapping', () => {
   });
 
   it('maps read-table command with --offset option', async () => {
-    const executeSpy = await runCommand(['read-table', 'My Table', '--offset', '10']);
+    const executeSpy = await runCommand(['read-table', '--title', 'My Table', '--offset', '10']);
     expect(executeSpy).toHaveBeenCalledWith('read_table', {
-      tableNameOrId: 'My Table',
+      tableTitle: 'My Table',
       limit: 50,
       offset: 10,
     });
@@ -300,12 +300,13 @@ describe('command bridge action mapping', () => {
   it('maps read-table command with --properties filter', async () => {
     const executeSpy = await runCommand([
       'read-table',
+      '--title',
       'My Table',
       '--properties',
       'Status,Priority',
     ]);
     expect(executeSpy).toHaveBeenCalledWith('read_table', {
-      tableNameOrId: 'My Table',
+      tableTitle: 'My Table',
       limit: 50,
       offset: 0,
       propertyFilter: ['Status', 'Priority'],
@@ -314,9 +315,9 @@ describe('command bridge action mapping', () => {
   });
 
   it('maps read-table command with Rem ID as table identifier', async () => {
-    const executeSpy = await runCommand(['read-table', 'abc123-rem-id']);
+    const executeSpy = await runCommand(['read-table', '--rem-id', 'abc123-rem-id']);
     expect(executeSpy).toHaveBeenCalledWith('read_table', {
-      tableNameOrId: 'abc123-rem-id',
+      tableRemId: 'abc123-rem-id',
       limit: 50,
       offset: 0,
     });
@@ -326,6 +327,7 @@ describe('command bridge action mapping', () => {
   it('maps read-table command with all options combined', async () => {
     const executeSpy = await runCommand([
       'read-table',
+      '--title',
       'Table',
       '--limit',
       '10',
@@ -335,7 +337,7 @@ describe('command bridge action mapping', () => {
       'Name',
     ]);
     expect(executeSpy).toHaveBeenCalledWith('read_table', {
-      tableNameOrId: 'Table',
+      tableTitle: 'Table',
       limit: 10,
       offset: 5,
       propertyFilter: ['Name'],
