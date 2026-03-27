@@ -5,9 +5,8 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
-- New `read-table` command for reading Advanced Table data (columns, rows, cell values) via the bridge
-- Options: `--limit`, `--offset`, `--properties` (comma-separated column filter)
-- Human-readable text output with ASCII table formatting
+- Added the `read-table` command for reading Advanced Table data via the bridge, with `--title` / `--rem-id`,
+  pagination, column filtering, and text output.
 - Added `./run-agent-integration-test.sh` for explicit agent-assisted live integration runs that wait for a connected
   bridge before launching the suite.
 
@@ -25,11 +24,6 @@ All notable changes to this project will be documented in this file.
 - Changed `read-table` to require exactly one explicit identifier flag: `--title` or `--rem-id`.
 
 ### Fixed
-- Fixed read-table integration config loading to use only
-  `~/.remnote-mcp-bridge/remnote-mcp-bridge.json`.
-- Tightened read-table integration coverage to validate filtering, deterministic error handling, and Rem-ID
-  lookup.
-- Improved read-table integration diagnostics so Rem-ID validation reports independently from name-lookup failures.
 - Hardened `run-agent-integration-test.sh` to source `node-check.sh`, build the CLI before daemon control commands, and
   surface daemon-log context when startup fails.
 
@@ -51,6 +45,10 @@ All notable changes to this project will be documented in this file.
   after bridge-code changes before reruns.
 - Clarified that switching from MCP server live integration tests to CLI live integration tests requires the MCP server
   to be stopped first.
+
+### Attribution
+
+- Most of the cross-repo `read-table` work in this release was implemented by @timbeckss.
 
 ## [0.10.0] - 2026-03-18
 
