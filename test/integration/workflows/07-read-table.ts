@@ -6,7 +6,7 @@
  *
  * Prerequisites:
  * - Config file must exist at $HOME/.remnote-mcp-bridge/remnote-mcp-bridge.json
- * - Must contain integrationTest.tableName and/or integrationTest.tableRemId
+ * - Must contain both integrationTest.tableName and integrationTest.tableRemId
  */
 
 import { assertContains, assertEqual, assertTruthy } from '../assertions.js';
@@ -49,11 +49,10 @@ export async function readTableWorkflow(
   }
 
   const config = getIntegrationTestConfig()!;
-  const tableName = config.tableName ?? config.tableNameOrId;
+  const tableName = config.tableName;
   const tableRemId = config.tableRemId;
-  const primaryIdentifier = tableName ?? tableRemId ?? config.tableNameOrId;
 
-  if (!primaryIdentifier) {
+  if (!tableName || !tableRemId) {
     return {
       name: 'Read Table',
       steps: [{ label: getTableConfigWarning(), passed: true, durationMs: 0 }],
@@ -67,7 +66,7 @@ export async function readTableWorkflow(
   {
     const start = Date.now();
     try {
-      const result = await ctx.cli.run(['read-table', primaryIdentifier]);
+      const result = await ctx.cli.run(['read-table', tableName]);
 
       if (result.exitCode !== 0) {
         throw new Error(
@@ -159,7 +158,7 @@ export async function readTableWorkflow(
       const selectedColumn = baseline.columns[0];
       const result = await ctx.cli.run([
         'read-table',
-        primaryIdentifier,
+        tableName,
         '--properties',
         selectedColumn.name,
       ]);
@@ -204,7 +203,7 @@ export async function readTableWorkflow(
   {
     const start = Date.now();
     try {
-      const result = await ctx.cli.run(['read-table', primaryIdentifier, '--limit', '1']);
+      const result = await ctx.cli.run(['read-table', tableName, '--limit', '1']);
 
       if (result.exitCode !== 0) {
         throw new Error(
@@ -240,7 +239,7 @@ export async function readTableWorkflow(
   {
     const start = Date.now();
     try {
-      const result = await ctx.cli.run(['read-table', primaryIdentifier, '--offset', '1']);
+      const result = await ctx.cli.run(['read-table', tableName, '--offset', '1']);
 
       if (result.exitCode !== 0) {
         throw new Error(
