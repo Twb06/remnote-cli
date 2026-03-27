@@ -17,12 +17,6 @@ function connectClient(port: number): Promise<WebSocket> {
   });
 }
 
-function waitForMessage(ws: WebSocket): Promise<string> {
-  return new Promise((resolve) => {
-    ws.once('message', (data) => resolve(data.toString()));
-  });
-}
-
 function waitForMatchingMessage(
   ws: WebSocket,
   predicate: (message: Record<string, unknown>) => boolean
