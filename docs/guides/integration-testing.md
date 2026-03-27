@@ -7,7 +7,8 @@ real content in RemNote, prefixed with `[CLI-TEST]` for easy cleanup.
 
 1. RemNote desktop app running
 2. RemNote Automation Bridge plugin installed and enabled in RemNote
-3. CLI daemon already running (for example: `./run-daemon-in-foreground.sh`)
+3. CLI daemon available, either already running (for example: `./run-daemon-in-foreground.sh`) or started by the
+   agent wrapper
 4. Project built: `npm run build`
 
 ## Running Tests
@@ -18,6 +19,10 @@ real content in RemNote, prefixed with `[CLI-TEST]` for easy cleanup.
 
 # Skip confirmation
 ./run-integration-test.sh --yes
+
+# Agent-assisted — starts the daemon if needed, waits for bridge connection, then runs the suite
+./run-agent-integration-test.sh
+./run-agent-integration-test.sh --yes
 ```
 
 Or directly:
@@ -101,3 +106,5 @@ npm run test:integration
 ```
 
 The read-table workflow is skipped when either field is missing or the config is invalid.
+AI agents should use `./run-agent-integration-test.sh [--yes]` instead of calling the raw integration entrypoints
+directly; the wrapper keeps the run gated on a live bridge connection.

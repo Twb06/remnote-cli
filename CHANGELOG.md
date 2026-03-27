@@ -8,6 +8,8 @@ All notable changes to this project will be documented in this file.
 - New `read-table` command for reading Advanced Table data (columns, rows, cell values) via the bridge
 - Options: `--limit`, `--offset`, `--properties` (comma-separated column filter)
 - Human-readable text output with ASCII table formatting
+- Added `./run-agent-integration-test.sh` for explicit agent-assisted live integration runs that wait for a connected
+  bridge before launching the suite.
 
 ### Changed
 
@@ -42,6 +44,7 @@ All notable changes to this project will be documented in this file.
 - Documented `read-table` in the README and command/integration guides, including the strict table test config.
 - Expanded `docs/demo.md` with a Discord/OpenClaw screenshot showing a YouTube summary workflow saved into a RemNote
   journal entry.
+- Replaced the blanket agent ban in integration-test policy docs with the guarded wrapper flow for explicit human-requested live runs.
 
 ## [0.10.0] - 2026-03-18
 
